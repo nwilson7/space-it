@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myapp',
     'users',
-    'destination'
+    'destination',
+    'rockets',
+    'cargo',
 ]
 
 MIDDLEWARE = [
