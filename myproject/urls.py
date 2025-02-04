@@ -7,4 +7,5 @@ urlpatterns = [
     path('users/',include('users.urls')),
     path('rockets/',include('rockets.urls')),
     path('cargo/',include('cargo.urls')),
+    path('launches/',include('launches.urls'))
 ]

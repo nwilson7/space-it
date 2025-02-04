@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Launch</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Add a New Launch</h1>
+    <form id="launch-form">
+        <p>We will use these details to check what rockets are available on that day and to see which rockets are able to travel that far</p>
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Find Available Rockets</button>
+    </form>
+
+    <div id="launch-details" style="display:none;">
+        <p id="launch-date"></p>
+        <p id="destination"></p>
+    </div>
+
+    <div id="rockets-container" style="display:none;">
+        <h2>Available Rockets</h2>
+        <select id="rockets-dropdown">
+            <option value="">Select a rocket</option>
+        </select>
+    </div>
+
+    <a href="{% url 'view_launches' %}">Back to Launches</a>
+
+    <script>
+        $(document).ready(function () {
+            $("#launch-form").submit(function (event) {
+                event.preventDefault();
+
+                let formData = $(this).serialize();
+
+                $.ajax({
+                    url: "{% url 'get_available_rockets' %}",
+                    type: "GET",
+                    data: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    success: function (data) {
+                        let dropdown = $("#rockets-dropdown");
+                        dropdown.empty();
+                        dropdown.append('<option value="">Select a rocket</option>');
+
+                        // Display the required range
+                        if (data.required_range !== null) {
+                            $("#required-range").text("Required Range: " + data.required_range + " km");
+                        } else {
+                            $("#required-range").text("Error: Unable to calculate required range.");
+                        }
+
+                        // Display launch date
+                        if (data.launch_date !== null) {
+                            $("#launch-date").text("Launch Date: " + data.launch_date);  // Display the launch date
+                        } else {
+                            $("#launch-date").text("Error: Unable to retrieve launch date.");
+                        }
+
+                        // Display destination
+                        if (data.destination !== null) {
+                            $("#destination").text("Destination: " + data.destination);  // Display the destination name
+                        } else {
+                            $("#destination").text("Error: Unable to retrieve destination.");
+                        }
+
+                        if (data.available_rockets.length === 0) {
+                            alert("No available rockets for this date and destination.");
+                            $("#rockets-container").hide();
+                        } else {
+                            $.each(data.available_rockets, function (index, rocket) {
+                                dropdown.append(`<option value="${rocket.id}">${rocket.name} - Cost: £${rocket.cost} - Capacity: ${rocket.capacity}kg</option>`);
+                            });
+                            $("#rockets-container").show();
+                            $("#launch-details").show();
+                        }
+                    },
+                    error: function () {
+                        alert("Error fetching available rockets.");
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
