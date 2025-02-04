@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'myapp',
     'users',
     'destination',
     'rockets',
@@ -84,7 +84,7 @@ DATABASES = {
        'ENGINE':'django.db.backends.mysql',
        'NAME':'spaceit',
        'USER':'root',
-       'PASSWORD':'root',
+       'PASSWORD': os.getenv('DB_PASSWORD'),
        'HOST':'localhost',
        'PORT':'3306',
     }
@@ -132,3 +132,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
