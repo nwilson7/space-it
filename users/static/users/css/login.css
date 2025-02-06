@@ -1,0 +1,81 @@
+/* Login page specific styles */
+
+/* Logo at top-left */
+header {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+/* Logo styling */
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff; /* White text color */
+    background-color: transparent; /* Transparent background */
+}
+
+/* Container styling */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;  /* Full viewport height */
+    padding: 0 20px; /* Add padding to both sides */
+    box-sizing: border-box; /* Ensures padding is included in the width calculation */
+    width: 100%;  /* Make sure the container spans the full width */
+}
+
+/* Form styling */
+form {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px; /* Form width constraint */
+    margin: 0 auto; /* Center the form */
+    box-sizing: border-box; /* Include padding and border in width calculation */
+    text-align: left;
+}
+
+form h2 {
+    margin-bottom: 20px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* Form input styling */
+form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box; /* Ensure padding is inside the element */
+}
+
+form button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #444;
+}
+
+/* Dropdown menu and buttons (if needed) */
+.user-profile {
+    position: relative;
+    display: inline
