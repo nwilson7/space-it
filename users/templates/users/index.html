@@ -1,18 +1,32 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homepage</title>
+    <title>SPACE IT! Dashboard</title>
+    <link rel="stylesheet" href="{% static 'users/styles.css' %}">
+    <script defer src="{% static 'users/script.js' %}"></script>
 </head>
 <body>
-    <h1>Welcome to the Homepage!</h1>
+    <header>
+        <div class="logo">SPACE IT!</div>
+        <div class="user-profile">
+            <div class="user-circle" onclick="toggleDropdown()">User</div>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a href="/users/edit">Edit Profile</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+    </header>
 
-    <p>Welcome, {{ user.username }}! You are logged in.</p>
-
-    <p><a href="{% url 'logout' %}">Logout</a></p>
-
-    <!-- Add more content here, like a dashboard or other sections -->
+    <main>
+        <div class="container">
+            <button class="big-button">Launches</button>
+            <button class="medium-button" id="mainButton"></button>
+            <button class="medium-button">Transactions</button>
+        </div>
+    </main>
 
 </body>
 </html>

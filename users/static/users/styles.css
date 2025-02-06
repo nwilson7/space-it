@@ -1,0 +1,89 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f4f4f4;
+    text-align: center;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #222;
+    color: white;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.user-profile {
+    position: relative;
+    display: inline-block;
+}
+
+.user-circle {
+    width: 40px;
+    height: 40px;
+    background: white;
+    color: black;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 150px;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 10px;
+    color: black;
+    text-decoration: none;
+}
+
+.dropdown-menu a:hover {
+    background: #eee;
+}
+
+.container {
+    margin-top: 50px;
+}
+
+.big-button, .medium-button {
+    display: block;
+    width: 200px;
+    padding: 15px;
+    margin: 10px auto;
+    border: none;
+    border-radius: 5px;
+    background: #555;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.big-button {
+    height: 120px;
+}
+
+.medium-button {
+    height: 50px;
+}
