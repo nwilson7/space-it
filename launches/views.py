@@ -1,4 +1,4 @@
-from django.db.models import Q, Count, Case, When, Value, IntegerField, F
+from django.db.models import Q, Count, Sum, F
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Launch, Rocket, Destination
 from cargo.models import Cargo
@@ -9,7 +9,6 @@ import json
 import decimal
 from django.core.exceptions import ValidationError
 from datetime import date
-from django.http import HttpResponse
 from bookings.models import Booking
 from django.db import models, transaction
 
@@ -17,6 +16,19 @@ from django.db import models, transaction
 # REPLACE 2 WITH THE USER_ID IN SESSION
 def view_your_launches(request):
     launches = Launch.objects.filter(rocket__owner_id=2).order_by('launch_date')
+    launches = launches.annotate(
+        number_of_bookings=Count(
+            'booking',
+            filter=Q(booking__launch__rocket__owner_id=2, booking__cancelled=False),
+            distinct=True
+        )
+    )
+
+    for launch in launches:
+        total_revenue = sum(booking.payment_amount for booking in launch.booking_set.filter(cancelled=False))
+        total_profit = total_revenue - launch.launch_cost
+        launch.total_profit = total_profit
+
     today = date.today()
     return render(request, "launches/view_launches.html", {"launches": launches, "today": today})
 
@@ -165,10 +177,22 @@ def delete_launch(request, id):
 
     return redirect("view_your_launches")
 
+def view_booked(request, id):
+    launch = get_object_or_404(Launch, id=id)
+    bookings = Booking.objects.filter(launch=launch, cancelled=False)
+    total_revenue = sum(booking.payment_amount for booking in bookings)
+    total_profit = total_revenue - launch.launch_cost
+
+    return render(request, "launches/view_booked.html", {
+        "launch": launch,
+        "bookings": bookings,
+        "total_revenue": total_revenue,
+        "total_profit": total_profit
+    })
+
 class CapacityExceededError(Exception):
     pass
 
-# REPLACE WITH ACTUAL OWNER ID
 def make_booking(request, id):
     launch = get_object_or_404(Launch, id=id)
 
