@@ -22,6 +22,7 @@
                     <th>Remaining Capacity (kg)</th>
                     <th>Cost (£)</th>
                     <th>Price per kg</th>
+                    <th>Projected Profits (£)</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -36,17 +37,27 @@
                             <td>{{ launch.launch_cost }}</td>
                             <td>{{ launch.price_per_kg }}</td>
                             <td>
-                                <a href="{% url 'edit_launch' launch.id %}" class="btn btn-secondary btn-sm">Bookings</a>
-                                <a href="{% url 'edit_launch' launch.id %}" class="btn btn-warning btn-sm">Edit</a>
-                                {% if launch.remaining_capacity_kg >= launch.rocket.cargo_capacity_kg and launch.launch_date >= today %}
+                                {% if launch.total_profit < 0 %}
+                                    <span class="text-danger">{{ launch.total_profit }}</span>
+                                {% else %}
+                                    <span class="text-success">{{ launch.total_profit }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if launch.number_of_bookings > 0 %}
+                                    <a href="{% url 'view_booked' launch.id %}" class="btn btn-primary btn-sm">
+                                        View Bookings <span class="badge bg-light text-dark">{{ launch.number_of_bookings }}</span>
+                                    </a>
+                                {% else %}
                                     <a href="{% url 'delete_launch' launch.id %}" class="btn btn-danger btn-sm">Delete</a>
                                 {% endif %}
+                                <a href="{% url 'edit_launch' launch.id %}" class="btn btn-warning btn-sm">Edit</a>
                             </td>
                         </tr>
                     {% endif %}
                 {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center">No upcoming launches available.</td>
+                        <td colspan="8" class="text-center">No upcoming launches available.</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -74,7 +85,13 @@
                             <td>{{ launch.rocket.name }}</td>
                             <td>{{ launch.destination }}</td>
                             <td><strong>To be added</strong></td>
-                            <td><strong>To be added</strong></td>
+                            <td>
+                                {% if launch.total_profit < 0 %}
+                                    <span class="text-danger">{{ launch.total_profit }}</span>
+                                {% else %}
+                                    <span class="text-success">{{ launch.total_profit }}</span>
+                                {% endif %}
+                            </td>
                             <td>{{ launch.launch_cost }}</td>
                             <td><a href="#" class="btn btn-primary btn-sm">Transactions</a></td>
                         </tr>
