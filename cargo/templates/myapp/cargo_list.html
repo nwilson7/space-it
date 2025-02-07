@@ -37,6 +37,8 @@
                              <!-- IF BOOKED BUT NOT LAUNCHED ADD THAT AS AWAITING LAUNCHED -->
                             {% if cargo.launched %}
                                 <span class="badge bg-success">Launched</span>
+                            {% elif cargo.is_booked %}
+                                <span class="badge bg-info text-white">Booked</span>
                             {% else %}
                                 <span class="badge bg-warning text-dark">Pending</span>
                             {% endif %}

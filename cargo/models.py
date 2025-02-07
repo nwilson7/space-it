@@ -12,3 +12,6 @@ class Cargo(models.Model):
 
     def total_weight(self):
         return self.weight_per_item * self.number_of_items
+
+    def is_booked(self):
+        return self.booking_set.filter(cancelled=False).exists()

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Make Booking</title>
+</head>
+<body>
+    <h1>Make a Booking</h1>
+
+    <!-- Display Launch Information -->
+    <div>
+        <h3>Launch Details</h3>
+        <p><strong>Date:</strong> {{ launch.launch_date }}</p>
+        <p><strong>Rocket:</strong> {{ launch.rocket.name }}</p>
+        <p><strong>Destination:</strong> {{ launch.destination }}</p>
+        <p><strong>Remaining Capacity (kg):</strong> <span id="remaining-capacity">{{ launch.remaining_capacity_kg }}</span></p>
+        <p><strong>Price per kg:</strong> £{{ launch.price_per_kg }}</p>
+    </div>
+
+    <!-- Cargo Selection Table -->
+    <form method="post" id="booking-form">
+        {% csrf_token %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Cargo Name</th>
+                    <th>Weight per Item (kg)</th>
+                    <th>Number of Items</th>
+                    <th>Total Weight (kg)</th>
+                    <th>Total Cost (£)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cargo in cargo %}
+                <tr>
+                    <td>
+                        <input type="checkbox" class="cargo-checkbox" name="cargo_ids"
+                               value="{{ cargo.id }}"
+                               data-cargo-id="{{ cargo.id }}"
+                               data-weight="{{ cargo.weight_per_item }}"
+                               data-quantity="{{ cargo.number_of_items }}"
+                               data-total-weight-id="total-weight-{{ forloop.counter }}"
+                               data-total-cost-id="total-cost-{{ forloop.counter }}"
+                               {% if cargo.booked %} checked {% endif %}>
+                    </td>
+                    <td>{{ cargo.cargoname }}</td>
+                    <td>{{ cargo.weight_per_item }}</td>
+                    <td>{{ cargo.number_of_items }}</td>
+                    <td id="total-weight-{{ forloop.counter }}">0</td>
+                    <td id="total-cost-{{ forloop.counter }}">£0.00</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Statistics Section -->
+        <div>
+            <p><strong>Total Cost:</strong> £<span id="total-cost">0.00</span></p>
+            <p><strong>Remaining Capacity (kg):</strong> <span id="updated-capacity">{{ launch.remaining_capacity_kg }}</span></p>
+            <p><strong>Total Weight Added (kg):</strong> <span id="total-weight-added">0.00</span></p>
+        </div>
+
+        <button type="submit" id="submit-btn" disabled>Confirm Booking</button>
+        <button type="button" id="cancel-button" onclick="window.location.href='{% url 'view_all_launches' %}'">Cancel</button>
+    </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const checkboxes = document.querySelectorAll(".cargo-checkbox");
+            const totalCostElem = document.getElementById("total-cost");
+            const remainingCapacityElem = document.getElementById("updated-capacity");
+            const totalWeightAddedElem = document.getElementById("total-weight-added");
+            const submitBtn = document.getElementById("submit-btn");
+            const bookingForm = document.getElementById("booking-form");
+            const pricePerKg = {{ launch.price_per_kg }};
+            const originalRemainingCapacity = {{ launch.remaining_capacity_kg }};  // Store original value
+
+            // Track initial checked state of each cargo
+            checkboxes.forEach(checkbox => {
+                checkbox.dataset.initialChecked = checkbox.checked;
+            });
+
+            function updateStats() {
+                let totalWeight = 0;
+                let totalCost = 0;
+                let capacityChange = 0;
+
+                checkboxes.forEach(checkbox => {
+                    const weightPerItem = parseFloat(checkbox.dataset.weight);
+                    const quantity = parseInt(checkbox.dataset.quantity);
+                    const cargoWeight = weightPerItem * quantity;
+                    const isChecked = checkbox.checked;
+                    const wasInitiallyChecked = checkbox.dataset.initialChecked === 'true';
+
+                    // Update weight and cost displays
+                    const totalWeightCell = document.getElementById(checkbox.dataset.totalWeightId);
+                    const totalCostCell = document.getElementById(checkbox.dataset.totalCostId);
+                    totalWeightCell.textContent = cargoWeight.toFixed(2);
+                    totalCostCell.textContent = "£" + (cargoWeight * pricePerKg).toFixed(2);
+
+                    if (isChecked) {
+                        totalWeight += cargoWeight;
+                        totalCost += cargoWeight * pricePerKg;
+
+                        // Subtract capacity if newly selected
+                        if (!wasInitiallyChecked) capacityChange -= cargoWeight;
+                    } else {
+                        // Add back capacity if deselected from initial state
+                        if (wasInitiallyChecked) capacityChange += cargoWeight;
+                    }
+                });
+
+                // Calculate remaining capacity correctly
+                const remainingCapacity = originalRemainingCapacity + capacityChange;
+
+                // Update display elements
+                remainingCapacityElem.textContent = remainingCapacity.toFixed(2);
+                remainingCapacityElem.style.color = remainingCapacity < 0 ? "red" : "green";
+                totalCostElem.textContent = totalCost.toFixed(2);
+                totalWeightAddedElem.textContent = totalWeight.toFixed(2);
+                submitBtn.disabled = remainingCapacity < 0;
+            }
+
+            // Attach event listeners
+            checkboxes.forEach(checkbox => checkbox.addEventListener("change", updateStats));
+            updateStats(); // Initial calculation
+
+            // Form submission handling (corrected to use proper FormData)
+            bookingForm.addEventListener("submit", function(event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+
+                fetch("{% url 'make_booking' launch.id %}", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = "{% url 'view_all_launches' %}";
+                    } else {
+                        alert("Error: " + (data.message || "Unknown error occurred"));
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("An error occurred. Please try again.");
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

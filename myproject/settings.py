@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rockets',
     'cargo',
     'launches',
+    'bookings'
 ]
 
 MIDDLEWARE = [
