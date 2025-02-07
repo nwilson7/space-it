@@ -3,23 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Launch Form</title>
+    <title>Edit Launch</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>Add Rocket</h1>
+    <h1>Edit Launch</h1>
+
+    <h2>Current Launch Information</h2>
+    <p><strong>Launch Date:</strong> {{ launch.launch_date }}</p>
+    <p><strong>Destination:</strong> {{ launch.destination.name }}</p>  <!-- Assuming 'name' is the field in Destination model -->
+    <p><strong>Rocket:</strong> {{ launch.rocket.name }}</p>  <!-- Assuming 'name' is the field in Rocket model -->
+    <p><strong>Remaining capacity:</strong> {{ launch.remaining_capacity_kg }} kg</p>
+    <p><strong>Price per KG:</strong> £{{ launch.price_per_kg }}</p>
+
     <form id="launch-form">
         {% csrf_token %}
-        <!-- Step 1: Date & Destination -->
-        <div class="form-step" id="step-1">
-            {{ form.launch_date.label_tag }}
-            {{ form.launch_date }}
-
-            {{ form.destination.label_tag }}
-            {{ form.destination }}
-
-            <button type="button" onclick="loadRockets()">Find Available Rockets</button>
-        </div>
 
         <!-- Step 2: Rocket Selection -->
         <div class="form-step" id="step-2" style="display:none;">
@@ -33,7 +31,7 @@
         <div class="form-step" id="step-3" style="display:none;">
             {{ form.price_per_kg.label_tag }}
             {{ form.price_per_kg }}
-            <button type="submit">Schedule Launch</button>
+            <button type="submit">Update Launch</button>
         </div>
 
         <button type="button" id="cancel-button" onclick="window.location.href='{% url 'view_your_launches' %}'">Cancel</button>
@@ -44,20 +42,12 @@
     <script>
         // Field Dependencies
         let currentState = {
-            destinationName: null,
-            launchDate: null,
-            destination: null,
             rocket: null,
             price: null
         };
 
         // Reset dependent fields when prerequisites change
         function resetDependentFields(changedField) {
-            if (['launchDate', 'destination'].includes(changedField)) {
-                currentState.rocket = null;
-                currentState.price = null;
-                $('#step-2, #step-3').hide();
-            }
             if (changedField === 'rocket') {
                 currentState.price = null;
                 $('#step-3').hide();
@@ -67,29 +57,20 @@
         // Rocket Loader
         function loadRockets() {
             console.log("loading rockets...");
-            const destinationId = $("#id_destination").val();
-            const launchDate = $("#id_launch_date").val();
-            const destinationName = $("#id_destination option:selected").text();
-
-            // Add validation before submission
-            if (!destinationId || !launchDate) {
-                showErrors(['Please select a destination and a launch date']);
-                return;
-            }
+            const destinationId = "{{ launch.destination.id }}"; <!-- REPLACE WITH LAUNCH(DESTINATION_ID) -->
+            const launchDate = "{{ launch.launch_date|date:"Y-m-d" }}"; <!-- REPLACE WITH LAUNCH(LAUNCH_DATE) -->
 
             showErrors([]);
 
             $.ajax({
                 url: "{% url 'get_available_rockets' %}",
                 type: "GET",
+
                 data: {
                     destination: destinationId,
                     launch_date: launchDate
                 },
                 success: function(data) {
-                    currentState.destination = destinationId
-                    currentState.destinationName = destinationName
-                    currentState.launchDate = launchDate
                     console.log("currentState: ",currentState)
 
                     const rocketSelect = $("#rocket-select");
@@ -133,8 +114,6 @@
             e.preventDefault();
 
             const formData = {
-                launch_date: currentState.launchDate,
-                destination: currentState.destination,
                 rocket: currentState.rocket,
                 price_per_kg: currentState.price
             };
@@ -146,7 +125,7 @@
             }
 
             try {
-                const response = await fetch("{% url 'add_launch' %}", {
+                const response = await fetch("{% url 'edit_launch' id=launch.id %}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -188,6 +167,11 @@
         $('#id_price_per_kg').on('input', function() {
             currentState.price = $(this).val();
             console.log("currentState after price change:", currentState);
+        });
+
+        $(document).ready(function() {
+            console.log("about to load rockets...")
+            loadRockets();
         });
     </script>
 </body>

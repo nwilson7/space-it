@@ -1,99 +1,238 @@
+from django.db.models import Q, Count, Case, When, Value, IntegerField, F
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
 from .models import Launch, Rocket, Destination
+from cargo.models import Cargo
 from .forms import LaunchForm
 from django.contrib import messages
-# https://docs.google.com/document/d/1XGUq0u8KKOx4fce-acsl4qwd-HweDuUC6iR6hepofEU/edit?tab=t.0 review notes
-def get_available_rockets(request):
-    if request.method == "GET" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        form = LaunchForm(request.GET)
+from django.http import JsonResponse
+import json
+import decimal
+from django.core.exceptions import ValidationError
+from datetime import date
+from django.http import HttpResponse
+from bookings.models import Booking
+from django.db import models, transaction
 
-        if form.is_valid():
-            destination_id = form.cleaned_data['destination'].id
-            launch_date = form.cleaned_data['launch_date']
-            result = fetch_available_rockets(destination_id, launch_date)
-            available_rockets = result['available_rockets']
-            required_range = result['required_range']
-            destination = result['destination']
-            launch_date = result['launch_date']
-            return JsonResponse({ 'available_rockets': available_rockets, 'required_range': required_range, 'destination': destination, 'launch_date': launch_date }, safe=False)
-        else:
-            return JsonResponse({"error": "Invalid input"}, status=400)
-
-    return JsonResponse({"error": "Invalid request"}, status=400)
-
-
-def fetch_available_rockets(destination_id, launch_date, owner_id=2):
-    try:
-        destination = Destination.objects.get(id=destination_id)
-        rockets = Rocket.objects.filter(owner_id=owner_id)
-        available_rockets = []
-
-        required_range = destination.distance * 2 * 1.1
-
-        for rocket in rockets:
-            if rocket.range_au >= required_range and not Launch.objects.filter(rocket=rocket,
-                                                                            launch_date=launch_date).exists():
-                cost = calculate_launch_cost(destination.distance, rocket.fuel_consumption_rate, rocket.fuel_cost)
-                available_rockets.append({
-                    'id': rocket.id,
-                    'name': rocket.name,
-                    'cost': cost,
-                    'capacity': rocket.cargo_capacity_kg
-                })
-
-        return { 'available_rockets': available_rockets, 'required_range': required_range, 'destination': destination.name, 'launch_date': launch_date }
-    except Destination.DoesNotExist:
-        return { 'available_rockets': [], 'required_range': None, 'destination': None, 'launch_date': None }
-
-def calculate_launch_cost(distance, fuel_consumption, fuel_cost):
-    return round(distance * 2 * float(fuel_consumption) * float(fuel_cost),2)
 
 # REPLACE 2 WITH THE USER_ID IN SESSION
-def view_launches(request):
-    """View all launches for a specific rocket owner"""
-    launches = Launch.objects.filter(rocket__owner_id=2)
-    return render(request, "launches/view_launches.html", {"launches": launches})
+def view_your_launches(request):
+    launches = Launch.objects.filter(rocket__owner_id=2).order_by('launch_date')
+    today = date.today()
+    return render(request, "launches/view_launches.html", {"launches": launches, "today": today})
 
 def view_all_launches(request):
-    """View all launches"""
-    launches = Launch.objects.all()
+    today = date.today()
+    launches = Launch.objects.filter(launch_date__gt=today).order_by('remaining_capacity_kg', 'launch_date')
+    launches = launches.annotate(
+        number_of_your_bookings=Count(
+            'booking',
+            filter=Q(booking__cargo__owner_id=1, booking__cancelled=False),
+            distinct=True
+        )
+    )
+    # Sort launches: first by remaining_capacity_kg, putting 0 last, and then by launch_date
+    launches = sorted(launches, key=lambda launch: (launch.remaining_capacity_kg == 0, launch.launch_date))
     return render(request, "launches/view_all_launches.html", {"launches": launches})
 
 def add_launch(request):
-    """Add a new launch"""
     if request.method == "POST":
-        form = LaunchForm(request.POST)
-        if form.is_valid():
+        try:
+            data = json.loads(request.body)  # Parse JSON body
+            print("Data received by the server:", data)
+
+            # Validate that required fields exist
+            required_fields = ["launch_date", "destination", "rocket", "price_per_kg"]
+            if not all(field in data for field in required_fields):
+                return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
+
+            # Convert and validate foreign keys
             try:
-                form.save()
-                messages.success(request, "Launch successfully scheduled!")
-                return redirect("view_all_launches")
-            except ValueError as e:
-                messages.error(request, str(e))
-    else:
-        form = LaunchForm()
+                destination = Destination.objects.get(id=int(data["destination"]))
+                rocket = Rocket.objects.get(id=int(data["rocket"]))
+            except (Destination.DoesNotExist, Rocket.DoesNotExist) as e:
+                print("Foreign key error:", str(e))
+                return JsonResponse({'status': 'error', 'message': 'Invalid foreign key reference'}, status=400)
+
+            # Convert and round price_per_kg (Ensure Decimal type)
+            try:
+                price_per_kg = decimal.Decimal(str(data["price_per_kg"])).quantize(decimal.Decimal("0.01"))
+            except decimal.InvalidOperation as e:
+                print("Decimal conversion error:", str(e))
+                return JsonResponse({'status': 'error', 'message': 'Invalid price format'}, status=400)
+
+            # Create and save the new Launch instance
+            new_launch = Launch.objects.create(
+                launch_date=data["launch_date"],
+                destination=destination,
+                rocket=rocket,
+                price_per_kg=price_per_kg
+            )
+
+            return JsonResponse({'status': 'success', 'launch_id': new_launch.id})
+
+        except json.JSONDecodeError as e:
+            print("JSON Decode Error:", str(e))
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+
+        except ValueError as ve:
+            print("ValueError:", str(ve))
+            return JsonResponse({'status': 'error', 'message': f'Value error: {str(ve)}'}, status=400)
+
+        except ValidationError as ve:
+            print("Validation Error:", ve.message_dict)
+            return JsonResponse({'status': 'error', 'message': 'Validation error', 'errors': ve.message_dict}, status=400)
+
+        except Exception as e:
+            print("Unexpected Error:", str(e))
+            return JsonResponse({'status': 'error', 'message': 'An unexpected error occurred', 'error': str(e)}, status=500)
+
+    form = LaunchForm()
     return render(request, "launches/add_launch.html", {"form": form})
 
 def edit_launch(request, id):
-    """Edit a launch"""
+    # Get the Launch object to edit based on id
     launch = get_object_or_404(Launch, id=id)
+
     if request.method == "POST":
-        form = LaunchForm(request.POST, instance=launch)
-        if form.is_valid():
+        try:
+            data = json.loads(request.body)  # Parse JSON body
+            print("Data received by the server:", data)
+
+            # Validate that required fields exist
+            required_fields = ["rocket", "price_per_kg"]
+            if not all(field in data for field in required_fields):
+                return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
+
+            # Convert and validate foreign keys
             try:
-                form.save()
-                messages.success(request, "Launch updated successfully!")
-                return redirect("view_all_launches")
-            except ValueError as e:
-                messages.error(request, str(e))
-    else:
-        form = LaunchForm(instance=launch)
+                rocket = Rocket.objects.get(id=int(data["rocket"]))
+            except (Rocket.DoesNotExist) as e:
+                print("Rocket DoesNotExist error:", str(e))
+                return JsonResponse({'status': 'error', 'message': 'Invalid rocket reference'}, status=400)
+
+            # Convert and round price_per_kg (Ensure Decimal type)
+            try:
+                price_per_kg = decimal.Decimal(str(data["price_per_kg"])).quantize(decimal.Decimal("0.01"))
+            except decimal.InvalidOperation as e:
+                print("Decimal conversion error:", str(e))
+                return JsonResponse({'status': 'error', 'message': 'Invalid price format'}, status=400)
+
+            launch.rocket = rocket
+            launch.price_per_kg = price_per_kg
+            launch.save()
+
+            return JsonResponse({'status': 'success', 'launch_id': launch.id})
+
+        except json.JSONDecodeError as e:
+            print("JSON Decode Error:", str(e))
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+
+        except ValueError as ve:
+            print("ValueError:", str(ve))
+            return JsonResponse({'status': 'error', 'message': f'Value error: {str(ve)}'}, status=400)
+
+        except ValidationError as ve:
+            print("Validation Error:", ve.message_dict)
+            return JsonResponse({'status': 'error', 'message': 'Validation error', 'errors': ve.message_dict},
+                                status=400)
+
+        except Exception as e:
+            print("Unexpected Error:", str(e))
+            return JsonResponse({'status': 'error', 'message': 'An unexpected error occurred', 'error': str(e)},
+                                status=500)
+
+    # Render the edit form with the existing launch data pre-filled
+    form = LaunchForm(instance=launch)
     return render(request, "launches/edit_launch.html", {"form": form, "launch": launch})
 
-def delete_rocket(request, id):
-    """Delete a rocket"""
-    rocket = get_object_or_404(Rocket, id=id)
-    rocket.delete()
-    messages.success(request, "Rocket successfully deleted!")
-    return redirect("view_all_launches")
+def delete_launch(request, id):
+    """Delete a launch if conditions are met"""
+    launch = get_object_or_404(Launch, id=id)
+
+    # 1. Check if the launch has already happened (i.e., launch_date is in the past)
+    if launch.launch_date < date.today():
+        messages.error(request, 'Launch has already happened, cannot delete.')
+        return redirect('view_your_launches')
+
+    # 2. Check if the remaining capacity is less than the rocket's cargo capacity
+    if launch.remaining_capacity_kg < launch.rocket.cargo_capacity_kg:
+        messages.error(request, "Remaining capacity is less than the rocket's cargo capacity, cannot delete.")
+        return redirect('view_your_launches')
+
+    # If conditions are met, delete the launch
+    launch.delete()
+    messages.success(request, "Launch successfully deleted!")
+
+    return redirect("view_your_launches")
+
+class CapacityExceededError(Exception):
+    pass
+
+# REPLACE WITH ACTUAL OWNER ID
+def make_booking(request, id):
+    launch = get_object_or_404(Launch, id=id)
+
+    if request.method == "POST":
+        try:
+            # Get all cargo_ids from the post request
+            selected_cargo_ids = [int(cargo_id) for cargo_id in request.POST.getlist('cargo_ids')]  # Get cargo IDs from the form
+            print("selected_cargo_ids:", selected_cargo_ids)
+
+            booked_cargo_ids = list(Booking.objects.filter(launch=launch, cancelled=False).values_list('cargo_id', flat=True))
+            print("booked_cargo_ids:", booked_cargo_ids)
+
+            cargo_ids_to_book = [cargo_id for cargo_id in selected_cargo_ids if cargo_id not in booked_cargo_ids]
+            print("cargo_ids_to_book",cargo_ids_to_book)
+            cargo_to_book = Cargo.objects.filter(id__in=cargo_ids_to_book)
+            print("cargo_to_book",cargo_to_book)
+            cargo_ids_to_cancel = [cargo_id for cargo_id in booked_cargo_ids if cargo_id not in selected_cargo_ids]
+            print("cargo_ids_to_cancel",cargo_ids_to_cancel)
+            bookings_to_cancel = Booking.objects.filter(cargo_id__in=cargo_ids_to_cancel, cancelled=False, launch=launch)
+            print("bookings_to_cancel",bookings_to_cancel)
+
+            for cargo in cargo_to_book:
+                if cargo.launched:
+                    return JsonResponse(
+                        {"success": False, "message": f"Cargo {cargo.cargoname} has already been launched."},
+                        status=400)
+
+            new_remaining_capacity = launch.remaining_capacity_kg
+
+            with transaction.atomic():
+                for booking in bookings_to_cancel:
+                    print("about to cancel booking",booking)
+                    Booking.objects.filter(id=booking.id).update(cancelled=True)
+                    print("booking cancelled")
+                    new_remaining_capacity += booking.cargo.total_weight()
+
+                for cargo in cargo_to_book:
+                    Booking.objects.create(
+                        cargo=cargo,
+                        launch=launch
+                    )
+                    new_remaining_capacity -= cargo.total_weight()
+
+                if new_remaining_capacity < 0:
+                    raise CapacityExceededError(f"Total cargo weight {new_remaining_capacity} exceeds the launch's remaining_capacity")
+
+                Launch.objects.filter(id=launch.id).update(remaining_capacity_kg=new_remaining_capacity)
+
+                return JsonResponse({"success":True,"message":"Booking successful! 🚀"})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": f"An error occurred while processing your booking: {e}"},status=500)
+
+    # Fetch all cargo that matches the launch destination, including both booked and unbooked
+    cargo = Cargo.objects.filter(
+        owner_id=1,
+        launched=False,
+        destination=launch.destination
+    ).exclude(
+        ~models.Q(id__in=Booking.objects.filter(cancelled=False, launch_id=launch.id).values_list('cargo_id', flat=True)) &
+        models.Q(id__in=Booking.objects.filter(cancelled=False).values_list('cargo_id', flat=True))
+    )
+
+    # Mark booked cargo
+    for c in cargo:
+        c.booked = Booking.objects.filter(cargo=c, launch=launch, cancelled=False).exists()
+
+    return render(request, "launches/make_booking.html", {"launch": launch, "cargo": cargo})

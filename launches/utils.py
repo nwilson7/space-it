@@ -45,9 +45,11 @@ def fetch_available_rockets(destination_id, launch_date, owner_id=2):
         destination = Destination.objects.get(id=destination_id)
         rockets = Rocket.objects.filter(owner_id=owner_id)
         available_rockets = []
-
+        print("rockets:",rockets)
         # Calculate the required range based on the destination's distance
         required_range = destination.distance * 2 * 1.1
+
+        print("required range: ",required_range)
 
         # Check for available rockets
         for rocket in rockets:
