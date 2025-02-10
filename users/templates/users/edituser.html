@@ -7,14 +7,29 @@
 <body>
     <h2>Edit Profile</h2>
 
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
+    <!-- Username Update Form -->
+    <form method="POST">
+        {% csrf_token %}
+        <h3>Change Username</h3>
+        {{ username_form.as_p }}
+        <button type="submit" name="update_username">Update Username</button>
+    </form>
 
-    <h3>Change Password</h3>
-    {{ password_form.as_p }}
+    <!-- Email Update Form -->
+    <form method="POST">
+        {% csrf_token %}
+        <h3>Change Email</h3>
+        {{ email_form.as_p }}
+        <button type="submit" name="update_email">Update Email</button>
+    </form>
 
-    <button type="submit">Save Changes</button>
-</form>
+    <!-- Password Change Form -->
+    <form method="POST">
+        {% csrf_token %}
+        <h3>Change Password</h3>
+        {{ password_form.as_p }}
+        <button type="submit" name="change_password">Update Password</button>
+    </form>
+    <a href="{% url 'home' %}" class="back-button">Back to Home</a>
 </body>
 </html>

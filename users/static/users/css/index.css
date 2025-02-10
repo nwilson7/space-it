@@ -71,3 +71,20 @@
 .medium-button {
     height: 50px;
 }
+
+.alert {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.alert.success {
+    background-color: #4CAF50; /* Green */
+    color: white;
+}
+
+.alert.error {
+    background-color: #f44336; /* Red */
+    color: white;
+}
