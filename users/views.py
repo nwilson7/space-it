@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect # get_object_or_404 to be added he
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
-from .forms import CustomUserCreationForm, CustomLoginForm, UserEditForm
+from .forms import CustomUserCreationForm, CustomLoginForm, UsernameUpdateForm, EmailUpdateForm
 from django.contrib import messages
 from .models import User
 
@@ -50,28 +50,43 @@ def logout_user(request):
 
 @login_required
 def edit_user(request):
-    user = request.user  # Get the currently logged-in user
+    user = request.user
 
     if request.method == 'POST':
-        form = UserEditForm(request.POST, instance=user)  # Pass user instance to form
-        password_form = PasswordChangeForm(user, request.POST)
+        if 'update_username' in request.POST:  # Username form submitted
+            username_form = UsernameUpdateForm(request.POST, instance=user)
+            if username_form.is_valid():
+                username_form.save()
+                messages.success(request, "Your username has been updated.")
+                return redirect('home')
 
-        if form.is_valid():
-            form.save()  # Save updated user details
-            messages.success(request, "Your profile has been updated.")
+        elif 'update_email' in request.POST:  # Email form submitted
+            email_form = EmailUpdateForm(request.POST, instance=user)
+            if email_form.is_valid():
+                email_form.save()
+                messages.success(request, "Your email has been updated.")
+                return redirect('home')
 
-        if password_form.is_valid():
-            user = password_form.save()
-            update_session_auth_hash(request, user)  # Keep the user logged in after password change
-            messages.success(request, "Your password has been updated.")
-
-        return redirect('edit_user')  # Redirect back to edit page
+        elif 'change_password' in request.POST:  # Password form submitted
+            password_form = PasswordChangeForm(user, request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, "Your password has been updated.")
+                return redirect('home')
+            else:
+                messages.error(request, "Please correct the error below.")
 
     else:
-        form = UserEditForm(instance=user)
+        username_form = UsernameUpdateForm(instance=user)
+        email_form = EmailUpdateForm(instance=user)
         password_form = PasswordChangeForm(user)
 
-    return render(request, 'users/edituser.html', {'form': form, 'password_form': password_form})
+    return render(request, 'users/edituser.html', {
+        'username_form': username_form,
+        'email_form': email_form,
+        'password_form': password_form,
+    })
 
 '''
 def delete_rocket_owner(request, user_id):
