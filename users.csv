@@ -1,0 +1,11 @@
+username,email,firstname,lastname,role
+jimbob,jim@bob.email,jim,bob,cargo_owner
+rocketman,rocket@man.email,elton,john,rocket_owner
+spacegirl,space@girl.email,samantha,carter,cargo_owner
+starboy,star@boy.email,abel,tesfaye,rocket_owner
+galaxyqueen,galaxy@queen.email,freyja,astrid,cargo_owner
+nebulae,nebula@e.email,neil,armstrong,rocket_owner
+marslover,mars@lover.email,ray,bradbury,cargo_owner
+lunarwolf,lunar@wolf.email,apollo,selene,rocket_owner
+voyager,voyager@space.email,carl,sagan,cargo_owner
+starlord,starlord@guardians.email,peter,quill,rocket_owner
