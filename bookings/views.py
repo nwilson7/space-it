@@ -4,9 +4,9 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from bookings.models import Booking
 from launches.models import Launch
+from users.decorators import role_required
 
-
-# Create your views here.
+@role_required('cargo_owner')
 def view_your_bookings(request):
     user_id = request.user.id
     today = timezone.now().date()
@@ -35,6 +35,7 @@ def view_your_bookings(request):
         }
     )
 
+@role_required('cargo_owner')
 def cancel_booking(request, id):
     try:
         booking = Booking.objects.get(id=id)

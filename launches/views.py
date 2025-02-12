@@ -1,4 +1,4 @@
-from django.db.models import Q, Count, Sum, F
+from django.db.models import Q, Count
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Launch, Rocket, Destination
 from cargo.models import Cargo
@@ -11,9 +11,10 @@ from django.core.exceptions import ValidationError
 from datetime import date
 from bookings.models import Booking
 from django.db import models, transaction
+from users.decorators import role_required
+from django.contrib.auth.decorators import login_required
 
-
-# REPLACE 2 WITH THE USER_ID IN SESSION
+@role_required('rocket_owner')
 def view_your_launches(request):
     user_id = request.user.id
     launches = Launch.objects.filter(rocket__owner_id=user_id).order_by('launch_date')
@@ -33,6 +34,7 @@ def view_your_launches(request):
     today = date.today()
     return render(request, "launches/view_launches.html", {"launches": launches, "today": today})
 
+@login_required
 def view_all_launches(request):
     user_id = request.user.id
     today = date.today()
@@ -48,6 +50,7 @@ def view_all_launches(request):
     launches = sorted(launches, key=lambda launch: (launch.remaining_capacity_kg == 0, launch.launch_date))
     return render(request, "launches/view_all_launches.html", {"launches": launches})
 
+@role_required('rocket_owner')
 def add_launch(request):
     # Add checks to ensure the user can only get their own rockets
     if request.method == "POST":
@@ -104,6 +107,7 @@ def add_launch(request):
     form = LaunchForm()
     return render(request, "launches/add_launch.html", {"form": form})
 
+@role_required('rocket_owner')
 def edit_launch(request, id):
     # Get the Launch object to edit based on id
     launch = get_object_or_404(Launch, id=id)
@@ -160,6 +164,7 @@ def edit_launch(request, id):
     form = LaunchForm(instance=launch)
     return render(request, "launches/edit_launch.html", {"form": form, "launch": launch})
 
+@role_required('rocket_owner')
 def delete_launch(request, id):
     """Delete a launch if conditions are met"""
     launch = get_object_or_404(Launch, id=id)
@@ -180,6 +185,7 @@ def delete_launch(request, id):
 
     return redirect("view_your_launches")
 
+@role_required('rocket_owner')
 def view_booked(request, id):
     launch = get_object_or_404(Launch, id=id)
     bookings = Booking.objects.filter(launch=launch, cancelled=False)
@@ -196,6 +202,7 @@ def view_booked(request, id):
 class CapacityExceededError(Exception):
     pass
 
+@role_required('cargo_owner')
 def make_booking(request, id):
     launch = get_object_or_404(Launch, id=id)
     

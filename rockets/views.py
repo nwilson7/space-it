@@ -3,17 +3,17 @@ from .models import Rocket
 from .forms import RocketForm
 from users.models import User
 from django.contrib.auth.decorators import login_required
-#from users.models import User  # Import the User model
-# Create your views here.
-
-# add an authorisation / authentication check
+from users.decorators import role_required
 
 # GET OWNER WITH SESSION DATA
+
+@role_required('rocket_owner')
 def view_rockets(request):
     user_id = request.user.id
     rockets = Rocket.objects.filter(owner_id=user_id)
     return render(request, "rockets/view_rockets.html", {'rockets': rockets})
-# UPDATE SO THAT ROCKET.OWNER IS TAKEN FROM SESSION
+
+@role_required('rocket_owner')
 def add_rocket(request):
     user_id = request.user.id
     if request.method == 'POST':
@@ -28,13 +28,12 @@ def add_rocket(request):
 
     return render(request, "rockets/add_rocket.html", {'form': form})
 
-# UPDATE SO THAT ROCKET.OWNER IS TAKEN FROM SESSION
+@role_required('rocket_owner')
 def edit_rocket(request, id):
     user_id = request.user.id
-    # Get the rocket object to be edited
+    
     rocket = get_object_or_404(Rocket, id=id, owner=request.user)
 
-    # Check if the form was submitted
     if request.method == 'POST':
         form = RocketForm(request.POST, instance=rocket)
         if form.is_valid():
@@ -47,6 +46,7 @@ def edit_rocket(request, id):
 
     return render(request, 'rockets/edit_rocket.html', {'form': form, 'rocket': rocket})
 
+@role_required('rocket_owner')
 def delete_rocket(request, id):
     # Get the rocket object to delete
     rocket = get_object_or_404(Rocket, id=id, owner=request.user)
