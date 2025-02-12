@@ -15,11 +15,12 @@ from django.db import models, transaction
 
 # REPLACE 2 WITH THE USER_ID IN SESSION
 def view_your_launches(request):
-    launches = Launch.objects.filter(rocket__owner_id=2).order_by('launch_date')
+    user_id = request.user.id
+    launches = Launch.objects.filter(rocket__owner_id=user_id).order_by('launch_date')
     launches = launches.annotate(
         number_of_bookings=Count(
             'booking',
-            filter=Q(booking__launch__rocket__owner_id=2, booking__cancelled=False),
+            filter=Q(booking__launch__rocket__owner_id=user_id, booking__cancelled=False),
             distinct=True
         )
     )
@@ -33,12 +34,13 @@ def view_your_launches(request):
     return render(request, "launches/view_launches.html", {"launches": launches, "today": today})
 
 def view_all_launches(request):
+    user_id = request.user.id
     today = date.today()
     launches = Launch.objects.filter(launch_date__gt=today).order_by('remaining_capacity_kg', 'launch_date')
     launches = launches.annotate(
         number_of_your_bookings=Count(
             'booking',
-            filter=Q(booking__cargo__owner_id=1, booking__cancelled=False),
+            filter=Q(booking__cargo__owner_id=user_id, booking__cancelled=False),
             distinct=True
         )
     )
@@ -47,6 +49,7 @@ def view_all_launches(request):
     return render(request, "launches/view_all_launches.html", {"launches": launches})
 
 def add_launch(request):
+    # Add checks to ensure the user can only get their own rockets
     if request.method == "POST":
         try:
             data = json.loads(request.body)  # Parse JSON body
@@ -195,7 +198,7 @@ class CapacityExceededError(Exception):
 
 def make_booking(request, id):
     launch = get_object_or_404(Launch, id=id)
-
+    
     if request.method == "POST":
         try:
             # Get all cargo_ids from the post request
@@ -245,9 +248,11 @@ def make_booking(request, id):
         except Exception as e:
             return JsonResponse({"success": False, "message": f"An error occurred while processing your booking: {e}"},status=500)
 
+    
     # Fetch all cargo that matches the launch destination, including both booked and unbooked
+    user_id = request.user.id
     cargo = Cargo.objects.filter(
-        owner_id=1,
+        owner_id=user_id,
         launched=False,
         destination=launch.destination
     ).exclude(

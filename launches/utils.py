@@ -1,6 +1,7 @@
 from .models import Destination, Rocket, Launch
 from django.http import JsonResponse
 from datetime import datetime
+from users.models import User
 
 def get_available_rockets(request):
     print("get_available_rockets successfully run!!")
@@ -24,7 +25,7 @@ def get_available_rockets(request):
             return JsonResponse({"error": "Invalid date format or destination ID"}, status=400)
 
         # Call the function to fetch available rockets
-        result = fetch_available_rockets(destination_id, launch_date)
+        result = fetch_available_rockets(request,destination_id, launch_date)
         available_rockets = result['available_rockets']
         required_range = result['required_range']
         destination = result['destination']
@@ -40,10 +41,11 @@ def get_available_rockets(request):
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
-def fetch_available_rockets(destination_id, launch_date, owner_id=2):
+def fetch_available_rockets(request,destination_id, launch_date):
     try:
+        user_id = request.user.id  
         destination = Destination.objects.get(id=destination_id)
-        rockets = Rocket.objects.filter(owner_id=owner_id)
+        rockets = Rocket.objects.filter(owner_id=user_id)
         available_rockets = []
         print("rockets:",rockets)
         # Calculate the required range based on the destination's distance

@@ -8,13 +8,14 @@ from launches.models import Launch
 
 # Create your views here.
 def view_your_bookings(request):
+    user_id = request.user.id
     today = timezone.now().date()
 
     pending_bookings = Booking.objects.filter(
         cancelled=False,
         launch__launch_date__gt=today,
         cargo__launched=False,
-        cargo__owner_id=1
+        cargo__owner_id=user_id
     ).order_by('launch__launch_date')  # Order by launch date of associated launch
 
     # Find bookings where the user (owner_id=1) has launched but non-cancelled bookings
@@ -22,7 +23,7 @@ def view_your_bookings(request):
         cancelled=False,
         launch__launch_date__lte=today,
         cargo__launched=True,
-        cargo__owner_id=1
+        cargo__owner_id=user_id
     ).order_by('launch__launch_date')  # Order by launch date of associated launch
 
     return render(

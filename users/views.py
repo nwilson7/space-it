@@ -10,7 +10,6 @@ from .models import User
 def index(request):
     return render(request,"users/index.html",{})
 
-
 def signup_user(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)

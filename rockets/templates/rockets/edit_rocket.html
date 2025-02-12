@@ -1,0 +1,19 @@
+<!-- myapp/templates/myapp/edit_rocket.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Rocket</title>
+</head>
+<body>
+    <h1>Edit Rocket: {{ form.instance.name }}</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- This will render the form fields as <p> tags -->
+        <button type="submit">Update Rocket</button>
+    </form>
+    <a href="{% url 'view_rockets' %}">Back to Rocket List</a>
+</body>
+</html>
