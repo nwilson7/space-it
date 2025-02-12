@@ -16,7 +16,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -27,9 +26,6 @@ SECRET_KEY = 'django-insecure-54pc2mwca8k3qe*su*0!issq=ufdiy@!as6fl!)kusvx7akhn3
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -43,7 +39,8 @@ INSTALLED_APPS = [
     'rockets',
     'cargo',
     'launches',
-    'bookings'
+    'bookings',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -76,21 +73,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
-       'ENGINE':'django.db.backends.mysql',
-       'NAME':'spaceit',
-       'USER':'root',
-       'PASSWORD': os.getenv('DB_PASSWORD'),
-       'HOST':'localhost',
-       'PORT':'3306',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DATABASE_NAME', 'spaceit'),
+        'USER': os.getenv('DATABASE_USER', 'root'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'root'),
+        'HOST': os.getenv('DATABASE_HOST', 'db'),
+        'PORT': os.getenv('DATABASE_PORT', '3306'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -136,3 +128,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Redis for result backend as well
+CELERY_TIMEZONE = 'UTC'
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'run-daily-task-at-midnight': {
+        'task': 'bookings.tasks.daily_task',
+        'schedule': crontab(hour=0, minute=0),
+    },
+    'saying hi! every minute': {
+        'task': 'users.tasks.say_hi',
+        'schedule': crontab(minute='*'),
+    }
+}
+
+# Kubernetes troubleshooting
