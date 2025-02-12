@@ -5,11 +5,15 @@ from django.contrib.auth.forms import PasswordChangeForm
 from .forms import CustomUserCreationForm, CustomLoginForm, UsernameUpdateForm, EmailUpdateForm
 from django.contrib import messages
 from .models import User
+from .decorators import logout_required
 
 # Create your views here.
+@login_required
 def index(request):
+    print(request.user.is_authenticated)
     return render(request,"users/index.html",{})
 
+@logout_required
 def signup_user(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -25,6 +29,7 @@ def signup_user(request):
 
     return render(request, 'users/signup.html', {'form': form})
 
+@logout_required
 def login_user(request):
     if request.method == 'POST':
         form = CustomLoginForm(request.POST)
@@ -42,6 +47,7 @@ def login_user(request):
 
     return render(request, 'users/login.html', {'form': form})
 
+@login_required
 def logout_user(request):
     logout(request)
     messages.success(request, "You have logged out successfully.")
@@ -86,7 +92,6 @@ def edit_user(request):
         'email_form': email_form,
         'password_form': password_form,
     })
-
 '''
 def delete_rocket_owner(request, user_id):
     user = get_object_or_404(User, id=user_id, role='rocket_owner')

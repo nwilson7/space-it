@@ -39,7 +39,8 @@ services:
       - .:/app
     ports:
       - "8000:8000"
-    command: ["gunicorn", "--bind", "0.0.0.0:8000", "myproject.wsgi:application"]
+    #command: ["gunicorn", "--bind", "0.0.0.0:8000", "myproject.wsgi:application"] Better suited for production
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]  # For dev, use Django's server
 
   celery:
     build: .
