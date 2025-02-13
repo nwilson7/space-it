@@ -64,6 +64,9 @@ def fetch_available_rockets(request,destination_id, launch_date):
                     'capacity': rocket.cargo_capacity_kg,
                     'cost_per_kg': round(cost / rocket.cargo_capacity_kg, 2)
                 })
+        
+        for rocket in available_rockets:
+            print("rocket",rocket['id'],rocket['name'],rocket['cost'],rocket['capacity'],rocket['cost_per_kg'])
 
         return {
             'available_rockets': available_rockets,

@@ -30,18 +30,20 @@
                         <td>{{ launch.remaining_capacity_kg }}</td>
                         <td>{{ launch.price_per_kg }}</td>
                         <td>
-                            {% if launch.remaining_capacity_kg > 0 %}
-                                {% if launch.number_of_your_bookings == 0 %}
-                                    <!-- Green button for "Make Booking" if no bookings yet -->
-                                    <a href="{% url 'make_booking' launch.id %}" class="btn btn-success btn-sm">Make Booking</a>
+                            {% if role == "cargo_owner" %}
+                                {% if launch.remaining_capacity_kg > 0 %}
+                                    {% if launch.number_of_your_bookings == 0 %}
+                                        <!-- Green button for "Make Booking" if no bookings yet -->
+                                        <a href="{% url 'make_booking' launch.id %}" class="btn btn-success btn-sm">Make Booking</a>
+                                    {% else %}
+                                        <!-- Blue button for "Add/Update Booking" with the number of bookings -->
+                                        <a href="{% url 'make_booking' launch.id %}" class="btn btn-primary btn-sm">
+                                            Add/Update Booking <span class="badge bg-light text-dark">{{ launch.number_of_your_bookings }}</span>
+                                        </a>
+                                    {% endif %}
                                 {% else %}
-                                    <!-- Blue button for "Add/Update Booking" with the number of bookings -->
-                                    <a href="{% url 'make_booking' launch.id %}" class="btn btn-primary btn-sm">
-                                        Add/Update Booking <span class="badge bg-light text-dark">{{ launch.number_of_your_bookings }}</span>
-                                    </a>
+                                    No space left
                                 {% endif %}
-                            {% else %}
-                                No space left
                             {% endif %}
                         </td>
                     </tr>
