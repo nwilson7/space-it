@@ -34,13 +34,34 @@ class CustomUserCreationForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'role', 'password1', 'password2']
 
-
 class UsernameUpdateForm(forms.ModelForm):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={'id': 'username-input'})
+    )
+
     class Meta:
         model = User
         fields = ['username']
 
 class EmailUpdateForm(forms.ModelForm):
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'id': 'email-input'})
+    )
+
     class Meta:
         model = User
         fields = ['email']
+
+class PasswordUpdateForm(forms.ModelForm):
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'id': 'password1-input'}),
+        required=True
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'id': 'password2-input'}),
+        required=True
+    )
+
+    class Meta:
+        model = User
+        fields = ['password1', 'password2']

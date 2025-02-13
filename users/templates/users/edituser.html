@@ -2,34 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Profile Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'users/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/edit-profile.css' %}">
+    <script src="{% static 'users/js/edit-profile.js' %}" defer></script> <!-- Include JS file -->
 </head>
 <body>
-    <h2>Edit Profile</h2>
+    <header>
+        <div class="logo">
+            SPACE-IT
+        </div>
+    </header>
 
-    <!-- Username Update Form -->
-    <form method="POST">
-        {% csrf_token %}
-        <h3>Change Username</h3>
-        {{ username_form.as_p }}
-        <button type="submit" name="update_username">Update Username</button>
-    </form>
+    <div class="container">
+        <form method="POST" id="edit-profile-form">
+            {% csrf_token %}
+            <h3>Change Username</h3>
+            {{ username_form.as_p }}
+            <span class="error-message" id="username-error"></span>
+            <button type="submit" name="update_username">Update Username</button>
+        </form>
 
-    <!-- Email Update Form -->
-    <form method="POST">
-        {% csrf_token %}
-        <h3>Change Email</h3>
-        {{ email_form.as_p }}
-        <button type="submit" name="update_email">Update Email</button>
-    </form>
+        <form method="POST" id="edit-email-form">
+            {% csrf_token %}
+            <h3>Change Email</h3>
+            {{ email_form.as_p }}
+            <span class="error-message" id="email-error"></span>
+            <button type="submit" name="update_email">Update Email</button>
+        </form>
 
-    <!-- Password Change Form -->
-    <form method="POST">
-        {% csrf_token %}
-        <h3>Change Password</h3>
-        {{ password_form.as_p }}
-        <button type="submit" name="change_password">Update Password</button>
-    </form>
-    <a href="{% url 'home' %}" class="back-button">Back to Home</a>
+        <form method="POST" id="edit-password-form">
+    {% csrf_token %}
+    <h3>Change Password</h3>
+
+    <label for="password1">New Password:</label>
+    <input type="password" id="password1" name="password1" required>
+    <span class="error-message" id="password1-error"></span>
+
+    <label for="password2">Confirm Password:</label>
+    <input type="password" id="password2" name="password2" required>
+    <span class="error-message" id="password2-error"></span>
+
+    <button type="submit" name="change_password">Update Password</button>
+</form>
+
+
+        <a href="{% url 'home' %}" class="back-button">Back to Home</a>
+    </div>
 </body>
 </html>
