@@ -11,7 +11,7 @@ django.setup()
 from users.models import User
 
 # Path to your CSV file
-csv_file_path = 'users.csv'
+csv_file_path = 'data/users.csv'
 
 def import_users_from_csv(csv_file_path):
     print("Importing users from CSV:", csv_file_path)
