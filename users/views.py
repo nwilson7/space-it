@@ -1,16 +1,15 @@
 from django.shortcuts import render, redirect # get_object_or_404 to be added here when used
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
-from django.contrib.auth.decorators import login_required
+#from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from .forms import CustomUserCreationForm, CustomLoginForm, UsernameUpdateForm, EmailUpdateForm
 from django.contrib import messages
 from .models import User
-from .decorators import logout_required
+from .decorators import logout_required, login_required
 
 # Create your views here.
 @login_required
 def index(request):
-    print(request.user.is_authenticated)
     return render(request,"users/index.html",{})
 
 @logout_required

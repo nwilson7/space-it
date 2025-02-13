@@ -16,11 +16,17 @@ def role_required(required_role):
     return decorator
 
 def logout_required(view_func):
-    def decorator(view_func):
-        @wraps(view_func)
-        def _wrapped_view(request, *args, **kwargs):
-            if request.user.is_authenticated:
-                return redirect("/users/home")
-            return view_func(request, *args, **kwargs)
-        return _wrapped_view
-    return decorator
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect("/users/home")
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+def login_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("/users/")  # Change to your login URL
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
