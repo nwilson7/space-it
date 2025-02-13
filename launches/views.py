@@ -37,6 +37,7 @@ def view_your_launches(request):
 @login_required
 def view_all_launches(request):
     user_id = request.user.id
+    user_role = request.user.role
     today = date.today()
     launches = Launch.objects.filter(launch_date__gt=today).order_by('remaining_capacity_kg', 'launch_date')
     launches = launches.annotate(
@@ -48,7 +49,7 @@ def view_all_launches(request):
     )
     # Sort launches: first by remaining_capacity_kg, putting 0 last, and then by launch_date
     launches = sorted(launches, key=lambda launch: (launch.remaining_capacity_kg == 0, launch.launch_date))
-    return render(request, "launches/view_all_launches.html", {"launches": launches})
+    return render(request, "launches/view_all_launches.html", {"launches": launches,"role": user_role})
 
 @role_required('rocket_owner')
 def add_launch(request):
