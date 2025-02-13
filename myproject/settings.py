@@ -129,10 +129,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/users/'
 LOGOUT_URL = '/users/home'
 
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Redis for result backend as well
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')  # Redis broker URL, use service name if in Docker
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'  # Redis backend, use service name if in Docker
 CELERY_TIMEZONE = 'UTC'
 
 from celery.schedules import crontab
@@ -141,11 +141,5 @@ CELERY_BEAT_SCHEDULE = {
     'run-daily-task-at-midnight': {
         'task': 'bookings.tasks.daily_task',
         'schedule': crontab(hour=0, minute=0),
-    },
-    'saying hi! every minute': {
-        'task': 'users.tasks.say_hi',
-        'schedule': crontab(minute='*'),
     }
 }
-
-# Kubernetes troubleshooting
