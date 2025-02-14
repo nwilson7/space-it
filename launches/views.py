@@ -1,4 +1,4 @@
-from django.db.models import Q, Count
+from django.db.models import Q, Count, F, ExpressionWrapper, IntegerField
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Launch, Rocket, Destination
 from cargo.models import Cargo
@@ -14,6 +14,7 @@ from django.db import models, transaction
 from users.decorators import role_required
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from .utils import fetch_available_rockets
 
 @role_required('rocket_owner')
 def view_your_launches(request):
@@ -25,7 +26,11 @@ def view_your_launches(request):
             filter=Q(booking__launch__rocket__owner_id=user_id, booking__cancelled=False),
             distinct=True
         ),
-        number_of_transactions=Count('booking__transaction')
+        number_of_transactions=Count('booking__transaction'),
+        cargo_registered_kg=ExpressionWrapper(
+            F('booking__launch__rocket__cargo_capacity_kg') - F('booking__launch__remaining_capacity_kg'),
+            output_field=IntegerField()
+        )
     )
 
     for launch in launches:
@@ -63,13 +68,19 @@ def add_launch(request):
 
             # Validate that required fields exist
             required_fields = ["launch_date", "destination", "rocket", "price_per_kg"]
+            
             if not all(field in data for field in required_fields):
                 return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
 
-            # Convert and validate foreign keys
+            available_rockets = fetch_available_rockets(request, data["destination"], data["launch_date"])
+
+            for rocket in available_rockets['available_rockets']: print("ar_rocket_id",rocket['id'],flush=True)
+            if not any(int(rocket['id']) == int(data['rocket']) for rocket in available_rockets['available_rockets']):
+                return JsonResponse({'status':'error','message':'invalid rocket choice'})
+            
             try:
                 destination = Destination.objects.get(id=int(data["destination"]))
-                rocket = Rocket.objects.get(id=int(data["rocket"]))
+                rocket = Rocket.objects.get(id=int(data["rocket"]),owner_id=request.user.id)
             except (Destination.DoesNotExist, Rocket.DoesNotExist) as e:
                 print("Foreign key error:", str(e))
                 return JsonResponse({'status': 'error', 'message': 'Invalid foreign key reference'}, status=400)
@@ -113,7 +124,7 @@ def add_launch(request):
 @role_required('rocket_owner')
 def edit_launch(request, id):
     # Get the Launch object to edit based on id
-    launch = get_object_or_404(Launch, id=id)
+    launch = get_object_or_404(Launch, id=id, rocket__owner=request.user)
 
     if request.method == "POST":
         try:
@@ -169,8 +180,7 @@ def edit_launch(request, id):
 
 @role_required('rocket_owner')
 def delete_launch(request, id):
-    """Delete a launch if conditions are met"""
-    launch = get_object_or_404(Launch, id=id)
+    launch = get_object_or_404(Launch, id=id, rocket__owner=request.user)
 
     # 1. Check if the launch has already happened (i.e., launch_date is in the past)
     if launch.launch_date < date.today():
@@ -190,7 +200,7 @@ def delete_launch(request, id):
 
 @role_required('rocket_owner')
 def view_booked(request, id):
-    launch = get_object_or_404(Launch, id=id)
+    launch = get_object_or_404(Launch, id=id, rocket__owner=request.user)
     bookings = Booking.objects.filter(launch=launch, cancelled=False)
     total_revenue = sum(booking.payment_amount for booking in bookings)
     total_profit = total_revenue - launch.launch_cost
@@ -225,7 +235,6 @@ def make_booking(request, id):
             cargo_ids_to_cancel = [cargo_id for cargo_id in booked_cargo_ids if cargo_id not in selected_cargo_ids]
             print("cargo_ids_to_cancel",cargo_ids_to_cancel)
             bookings_to_cancel = Booking.objects.filter(cargo_id__in=cargo_ids_to_cancel, cancelled=False, launch=launch)
-            print("bookings_to_cancel",bookings_to_cancel)
 
             for cargo in cargo_to_book:
                 if cargo.launched:
