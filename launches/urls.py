@@ -10,5 +10,6 @@ urlpatterns = [
     path("delete/<int:id>/", views.delete_launch, name="delete_launch"),
     path("get_available_rockets/", utils.get_available_rockets, name='get_available_rockets'),
     path("make_booking/<int:id>/", views.make_booking, name="make_booking"),
-    path("view_booked/<int:id>/", views.view_booked, name="view_booked")
+    path("view_booked/<int:id>/", views.view_booked, name="view_booked"),
+    path("view_launch_transactions/<int:id>/", views.view_launch_transactions, name="view_launch_transactions")
 ]
