@@ -18,11 +18,14 @@
             </div>
         {% endfor %}
     </div>
-{% endif %}
+    {% endif %}
+
     <header>
         <div class="logo">SPACE IT!</div>
         <div class="user-profile">
-            <div class="user-circle" onclick="toggleDropdown()">User</div>
+            <div class="user-circle" onclick="toggleDropdown()">
+                <span>{{ user_name }}</span>
+            </div>
             <div class="dropdown-menu" id="dropdownMenu">
                 <a href="/users/edit">Edit Profile</a>
                 <a href="/logout">Logout</a>
@@ -32,9 +35,48 @@
 
     <main>
         <div class="container">
-            <button class="big-button">Launches</button>
-            <button class="medium-button" id="mainButton"></button>
-            <button class="medium-button">Transactions</button>
+            <h1>Welcome to Your Dashboard</h1>
+
+            <div class="dashboard-buttons">
+                {% if role == "rocket_owner" %}
+                    <a href="{% url 'view_all_launches' %}" class="dashboard-button">Launches</a>
+                    <a href="{% url 'view_rockets' %}" class="dashboard-button">Your Rockets</a>
+                {% elif role == "cargo_owner" %}
+                    <a href="{% url 'launches' %}" class="dashboard-button">Launches</a>
+                    <a href="{% url 'cargo' %}" class="dashboard-button">Your Cargo</a>
+                {% endif %}
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Upcoming Launches</h2>
+                {% if upcoming_launches %}
+                    <table class="launch-table">
+                        <thead>
+                            <tr>
+                                <th>Launch Date</th>
+                                <th>Rocket</th>
+                                <th>Destination</th>
+                                <th>Remaining Capacity (kg)</th>
+                                <th>Price per kg (£)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for launch in upcoming_launches %}
+                                <tr>
+                                    <td>{{ launch.launch_date }}</td>
+                                    <td>{{ launch.rocket.name }}</td>
+                                    <td>{{ launch.destination.name }}</td>
+                                    <td>{{ launch.remaining_capacity_kg }}</td>
+                                    <td>{{ launch.price_per_kg }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <a href="{% url 'launches' %}" class="view-all">View All Launches</a>
+                {% else %}
+                    <p>No upcoming launches available.</p>
+                {% endif %}
+            </div>
         </div>
     </main>
 

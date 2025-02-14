@@ -1,90 +1,114 @@
-/* Index page specific styles */
+.container {
+    max-width: 900px;
+    margin: auto;
+    text-align: center;
+}
 
-/* User profile circle and dropdown */
+.dashboard-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.dashboard-button {
+    text-decoration: none;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.dashboard-button:hover {
+    background-color: #0056b3;
+}
+
+.dashboard-section {
+    margin-top: 30px;
+}
+
+.launch-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.launch-table th, .launch-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.view-all {
+    display: block;
+    margin-top: 10px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Style for the user profile circle */
 .user-profile {
     position: relative;
     display: inline-block;
 }
 
 .user-circle {
-    width: 40px;
-    height: 40px;
-    background: white;
-    color: black;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
+    padding: 10px 20px; /* Adjust the padding to make space for the name */
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%; /* Keep it circular */
+    display: inline-flex;
     justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
+    white-space: nowrap; /* Prevent name from breaking */
 }
 
-/* Dropdown menu styling for index page */
+.user-circle span {
+    display: inline-block;
+    max-width: 100%;
+    text-overflow: ellipsis; /* Add ellipsis for overflow text */
+    overflow: hidden;
+}
+
+/* Optional: You can also ensure the circle doesn't become too large */
+.user-circle {
+    max-width: 120px; /* Max width for the circle */
+    min-width: 40px; /* Ensure it's not too small */
+}
+
+
+.user-circle:hover {
+    background-color: #0056b3;
+}
+
+/* Style for the dropdown menu */
 .dropdown-menu {
     display: none;
     position: absolute;
-    top: 50px;
     right: 0;
-    background: white;
+    top: 50px;
+    background-color: #ffffff;
     border: 1px solid #ddd;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    min-width: 150px;
-}
-
-.dropdown-menu.show {
-    display: block;
+    border-radius: 5px;
+    width: 150px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .dropdown-menu a {
     display: block;
     padding: 10px;
-    color: black;
     text-decoration: none;
+    color: #333;
 }
 
 .dropdown-menu a:hover {
-    background: #eee;
+    background-color: #f1f1f1;
 }
 
-/* Container for index page */
-.container {
-    margin-top: 50px;
-}
-
-/* Button styling for index page */
-.big-button, .medium-button {
+/* Show the dropdown menu when toggled */
+.dropdown-menu.show {
     display: block;
-    width: 200px;
-    padding: 15px;
-    margin: 10px auto;
-    border: none;
-    border-radius: 5px;
-    background: #555;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-}
-
-.big-button {
-    height: 120px;
-}
-
-.medium-button {
-    height: 50px;
-}
-
-.alert {
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
-    font-weight: bold;
-}
-
-.alert.success {
-    background-color: #4CAF50; /* Green */
-    color: white;
-}
-
-.alert.error {
-    background-color: #f44336; /* Red */
-    color: white;
 }
