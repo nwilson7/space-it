@@ -19,6 +19,8 @@ class Booking(models.Model):
             if not self.payment_amount:
                 self.payment_amount = self.cargo.total_weight() * self.launch.price_per_kg
 
+            self.payment_amount = round(self.payment_amount, 2)
+
             if self.launch.remaining_capacity_kg - self.cargo.total_weight() < 0:
                 raise ValueError("Not enough remaining capacity on the rocket for this cargo.")
 
@@ -32,17 +34,22 @@ class Transaction(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_transactions')
     amount = models.FloatField()
     note = models.TextField(blank=True, null=True)
+    booking = models.ForeignKey(Booking, on_delete=models.SET_NULL, null=True, blank=True)  # Store Booking ID
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    # In models.py (Transaction model)
     def save(self, *args, **kwargs):
+        # Only auto-generate note if not provided
         if not self.note:
-            self.note = (
-                f"Cargo: {self.sender.cargo_set.first().cargoname} x {self.sender.cargo_set.first().number_of_items} "
-                f"(Total weight = {self.sender.cargo_set.first().total_weight()}) | "
-                f"Launch date: {self.sender.booking_set.first().launch.launch_date} | "
-                f"Rocket: {self.sender.booking_set.first().launch.rocket.name} | "
-                f"Destination: {self.sender.booking_set.first().launch.destination.name}")
+            if self.booking:  # Use the linked booking if available
+                cargo = self.booking.cargo
+                self.note = (
+                    f"Cargo: {cargo.cargoname} x {cargo.number_of_items} "
+                    f"(Total weight = {cargo.total_weight()}) | "
+                    f"Launch date: {self.booking.launch.launch_date} | "
+                    f"Rocket: {self.booking.launch.rocket.name} | "
+                    f"Destination: {self.booking.launch.destination.name}"
+                )
+            else:
+                self.note = "No associated cargo or booking found."
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.sender} → {self.recipient}: £{self.amount}"

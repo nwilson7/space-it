@@ -141,5 +141,9 @@ CELERY_BEAT_SCHEDULE = {
     'run-daily-task-at-midnight': {
         'task': 'bookings.tasks.daily_task',
         'schedule': crontab(hour=0, minute=0),
+    },
+    'test-daily-task-every-minute': {
+        'task': 'bookings.tasks.daily_task',
+        'schedule': crontab(minute='*')
     }
 }
