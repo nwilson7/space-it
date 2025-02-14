@@ -1,16 +1,25 @@
 from django.shortcuts import render, redirect # get_object_or_404 to be added here when used
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
-#from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from .forms import CustomUserCreationForm, CustomLoginForm, UsernameUpdateForm, EmailUpdateForm
 from django.contrib import messages
-from .models import User
 from .decorators import logout_required, login_required
+from django.utils import timezone
+from launches.models import Launch
 
-# Create your views here.
 @login_required
 def index(request):
-    return render(request,"users/index.html",{})
+    user = request.user  # Get the logged-in user
+    role = user.role  # Assuming 'role' is a field in your User model
+
+    # Fetch the first 3 upcoming launches
+    upcoming_launches = Launch.objects.filter(launch_date__gte=timezone.now()).order_by('launch_date')[:3]
+
+    return render(request, "users/index.html", {
+        "role": role,
+        "upcoming_launches": upcoming_launches,
+        "user_name": user.username,
+    })
 
 @logout_required
 def signup_user(request):
