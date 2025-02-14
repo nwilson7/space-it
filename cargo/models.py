@@ -11,7 +11,7 @@ class Cargo(models.Model):
     launched = models.BooleanField(default=False)
 
     def total_weight(self):
-        return self.weight_per_item * self.number_of_items
+        return round(self.weight_per_item * self.number_of_items,3)
 
     def is_booked(self):
         return self.booking_set.filter(cancelled=False).exists()

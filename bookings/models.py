@@ -19,6 +19,8 @@ class Booking(models.Model):
             if not self.payment_amount:
                 self.payment_amount = self.cargo.total_weight() * self.launch.price_per_kg
 
+            self.payment_amount = round(self.payment_amount, 2)
+
             if self.launch.remaining_capacity_kg - self.cargo.total_weight() < 0:
                 raise ValueError("Not enough remaining capacity on the rocket for this cargo.")
 
@@ -35,13 +37,20 @@ class Transaction(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
+        # Only auto-generate note if it's not provided
         if not self.note:
-            self.note = (
-                f"Cargo: {self.sender.cargo_set.first().cargoname} x {self.sender.cargo_set.first().number_of_items} "
-                f"(Total weight = {self.sender.cargo_set.first().total_weight()}) | "
-                f"Launch date: {self.sender.booking_set.first().launch.launch_date} | "
-                f"Rocket: {self.sender.booking_set.first().launch.rocket.name} | "
-                f"Destination: {self.sender.booking_set.first().launch.destination.name}")
+            booking = Booking.objects.filter(cargo__owner=self.sender).first()
+            if booking:
+                cargo = booking.cargo
+                self.note = (
+                    f"Cargo: {cargo.cargoname} x {cargo.number_of_items} "
+                    f"(Total weight = {cargo.total_weight()}) | "
+                    f"Launch date: {booking.launch.launch_date} | "
+                    f"Rocket: {booking.launch.rocket.name} | "
+                    f"Destination: {booking.launch.destination.name}"
+                )
+            else:
+                self.note = "No associated cargo or booking found."
         super().save(*args, **kwargs)
 
     def __str__(self):
