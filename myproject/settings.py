@@ -126,8 +126,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/users/'
-LOGOUT_URL = '/users/home'
+LOGIN_URL = '/'
+LOGOUT_URL = '/logout/'
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
