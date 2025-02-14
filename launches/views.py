@@ -9,10 +9,11 @@ import json
 import decimal
 from django.core.exceptions import ValidationError
 from datetime import date
-from bookings.models import Booking
+from bookings.models import Booking, Transaction
 from django.db import models, transaction
 from users.decorators import role_required
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
 @role_required('rocket_owner')
 def view_your_launches(request):
@@ -23,7 +24,8 @@ def view_your_launches(request):
             'booking',
             filter=Q(booking__launch__rocket__owner_id=user_id, booking__cancelled=False),
             distinct=True
-        )
+        ),
+        number_of_transactions=Count('booking__transaction')
     )
 
     for launch in launches:
@@ -273,3 +275,31 @@ def make_booking(request, id):
         c.booked = Booking.objects.filter(cargo=c, launch=launch, cancelled=False).exists()
 
     return render(request, "launches/make_booking.html", {"launch": launch, "cargo": cargo})
+
+@role_required('rocket_owner')
+def view_launch_transactions(request, id):
+    # Get the launch while ensuring the user owns the rocket and it's today or in the past
+    launch = get_object_or_404(
+        Launch,
+        id=id,
+        rocket__owner_id=request.user.id,
+        launch_date__lte=timezone.now().date()
+    )
+
+    transactions = Transaction.objects.filter(
+        booking__launch=launch,
+        booking__cancelled=False
+    )
+
+    if not transactions:
+        messages.warning(request, "No transactions found for this launch.")
+        return redirect('view_your_launches')  # Redirect if no transactions
+    
+    total_revenue = sum(transaction.amount for transaction in transactions)
+    profit = total_revenue - launch.launch_cost
+
+    return render(request, 'launches/view_launch_transactions.html', {
+        'launch': launch,
+        'transactions': transactions,
+        'profit':profit
+    })

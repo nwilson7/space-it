@@ -93,7 +93,15 @@
                                 {% endif %}
                             </td>
                             <td>{{ launch.launch_cost }}</td>
-                            <td><a href="#" class="btn btn-primary btn-sm">Transactions</a></td>
+                            <td>
+                                {% if launch.number_of_transactions > 0 %}
+                                    <a href="{% url 'view_launch_transactions' launch.id %}" class="btn btn-primary btn-sm">
+                                        View Transactions <span class="badge bg-light text-dark">{{ launch.number_of_transactions }}</span>
+                                    </a>
+                                {% else %}
+                                    No Transactions
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endif %}
                 {% empty %}
