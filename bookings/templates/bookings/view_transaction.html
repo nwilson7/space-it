@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transaction Details</title>
+</head>
+<body>
+    <h1>Transaction Details</h1>
+    <p><strong>Transaction ID:</strong> {{ transaction.id }}</p>
+    <p><strong>Booking ID:</strong> {{ transaction.booking_id }}</p>
+    <p><strong>Sender ID:</strong> {{ transaction.sender }}</p>
+    <p><strong>Recipient ID:</strong> {{ transaction.recipient }}</p>
+    <p><strong>Amount:</strong> {{ transaction.amount }}</p>
+    <p><strong>Note:</strong> {{ transaction.note }}</p>
+    <a href="{% url 'view_your_bookings' %}">Back to Your Bookings</a>
+    <!-- MAKE IT SO THE BACK BUTTON DEPENDS ON THE USER TYPE -->
+</body>
+</html>
