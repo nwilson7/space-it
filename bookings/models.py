@@ -34,24 +34,22 @@ class Transaction(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_transactions')
     amount = models.FloatField()
     note = models.TextField(blank=True, null=True)
+    booking = models.ForeignKey(Booking, on_delete=models.SET_NULL, null=True, blank=True)  # Store Booking ID
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    # In models.py (Transaction model)
     def save(self, *args, **kwargs):
-        # Only auto-generate note if it's not provided
+        # Only auto-generate note if not provided
         if not self.note:
-            booking = Booking.objects.filter(cargo__owner=self.sender).first()
-            if booking:
-                cargo = booking.cargo
+            if self.booking:  # Use the linked booking if available
+                cargo = self.booking.cargo
                 self.note = (
                     f"Cargo: {cargo.cargoname} x {cargo.number_of_items} "
                     f"(Total weight = {cargo.total_weight()}) | "
-                    f"Launch date: {booking.launch.launch_date} | "
-                    f"Rocket: {booking.launch.rocket.name} | "
-                    f"Destination: {booking.launch.destination.name}"
+                    f"Launch date: {self.booking.launch.launch_date} | "
+                    f"Rocket: {self.booking.launch.rocket.name} | "
+                    f"Destination: {self.booking.launch.destination.name}"
                 )
             else:
                 self.note = "No associated cargo or booking found."
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.sender} → {self.recipient}: £{self.amount}"

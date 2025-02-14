@@ -20,8 +20,8 @@
                     <th>Cargo Name</th>
                     <th>Item Weight</th>
                     <th>Number of Items</th>
-                    <th>Total Weight</th>
-                    <th>Payment Amount</th>
+                    <th>Total Weight (kg)</th>
+                    <th>Payment Amount (£)</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -59,8 +59,8 @@
                     <th>Cargo Name</th>
                     <th>Item Weight</th>
                     <th>Number of Items</th>
-                    <th>Total Weight</th>
-                    <th>Payment Amount</th>
+                    <th>Total Weight (kg)</th>
+                    <th>Payment Amount (£)</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -76,7 +76,7 @@
                         <td>{{ booking.payment_amount }}</td>
                         <td>
                             <!-- View Transaction Button -->
-                            <a href="#" class="btn btn-info btn-sm">View Transaction</a>
+                            <a href="{% url 'view_transaction' booking.id %}" class="btn btn-info btn-sm">View Transaction</a>
                         </td>
                     </tr>
                 {% empty %}

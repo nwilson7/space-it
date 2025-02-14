@@ -1,10 +1,10 @@
 from django.utils import timezone
 from django.db import transaction
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
-from bookings.models import Booking
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
+from django.shortcuts import render, get_object_or_404
+from bookings.models import Booking, Transaction
 from launches.models import Launch
-from users.decorators import role_required
+from users.decorators import role_required, login_required
 
 @role_required('cargo_owner')
 def view_your_bookings(request):
@@ -58,3 +58,24 @@ def cancel_booking(request, id):
 
     except Booking.DoesNotExist:
         return JsonResponse({"error": "Booking not found."})
+    
+@login_required
+def view_transaction(request, id):
+    # Get the transaction based on booking_id
+    transaction = get_object_or_404(Transaction, booking_id=id)
+    
+    if request.user.id not in [transaction.sender.id,transaction.recipient.id]:
+        return HttpResponseForbidden("You are not authorized to view this transaction.")
+    
+    # Render the transaction details
+    return render(request, 'bookings/view_transaction.html', {'transaction': transaction})
+
+@login_required
+def view_your_transactions(request):
+    if request.user.role == "cargo_owner":
+        transactions = Transaction.objects.filter(sender__id=request.user.id)
+    else:
+        transactions = Transaction.objects.filter(recipient__id=request.user.id)
+
+    # Render the transactions in the template
+    return render(request, 'bookings/view_your_transactions.html', {'transactions': transactions,'role': request.user.role})

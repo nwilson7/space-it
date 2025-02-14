@@ -5,6 +5,7 @@ from .models import Launch, Booking, Transaction
 from cargo.models import Cargo
 from celery import shared_task
 
+# In tasks.py
 @shared_task
 def daily_task():
     today_start = timezone.make_aware(datetime.combine(timezone.now().date(), datetime.min.time()))
@@ -19,7 +20,7 @@ def daily_task():
         for booking in bookings:
             cargo = booking.cargo
             if not cargo:
-                continue  # Skip invalid bookings
+                continue
 
             try:
                 with transaction.atomic():
@@ -30,8 +31,7 @@ def daily_task():
                     ).update(launched=True)
 
                     if not updated:
-                        print(f"Cargo {cargo.id} already processed. Skipping.")
-                        continue  # Skip if already launched
+                        continue
 
                     # Generate transaction note
                     note = (
@@ -42,12 +42,13 @@ def daily_task():
                         f"Destination: {launch.destination.name}"
                     )
 
-                    # Create transaction
+                    # Explicitly link to the current booking
                     Transaction.objects.create(
                         sender=cargo.owner,
                         recipient=launch.rocket.owner,
                         amount=booking.payment_amount,
-                        note=note
+                        note=note,
+                        booking=booking  # <-- Add this line
                     )
 
             except Exception as e:
