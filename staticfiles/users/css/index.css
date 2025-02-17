@@ -1,0 +1,66 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: url("{% static 'users/images/bg1.png' %}") no-repeat center center fixed;
+    background-size: cover;
+    color: #fff;
+}
+ 
+.dashboard-section {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    margin: 50px auto;
+    max-width: 80%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+ 
+.section-title {
+    font-size: 2rem;
+    text-align: center;
+    color: #ffcc00;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+}
+ 
+.launch-table-container {
+    overflow-x: auto;
+}
+ 
+.launch-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.1);
+}
+ 
+.launch-table th,
+.launch-table td {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px;
+    text-align: center;
+    color: #fff;
+}
+ 
+.launch-table th {
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffcc00;
+    text-transform: uppercase;
+}
+ 
+.launch-table td {
+    background: rgba(0, 0, 0, 0.5);
+}
+ 
+.btn {
+    font-size: 0.9rem;
+    margin: 2px;
+}
+ 
+.text-danger {
+    color: #ff5555 !important;
+}
+ 
+.text-success {
+    color: #55ff55 !important;
+}

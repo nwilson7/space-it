@@ -1,0 +1,114 @@
+.container {
+    max-width: 900px;
+    margin: auto;
+    text-align: center;
+}
+
+.dashboard-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.dashboard-button {
+    text-decoration: none;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.dashboard-button:hover {
+    background-color: #0056b3;
+}
+
+.dashboard-section {
+    margin-top: 30px;
+}
+
+.launch-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.launch-table th, .launch-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.view-all {
+    display: block;
+    margin-top: 10px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Style for the user profile circle */
+.user-profile {
+    position: relative;
+    display: inline-block;
+}
+
+.user-circle {
+    padding: 10px 20px; /* Adjust the padding to make space for the name */
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%; /* Keep it circular */
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap; /* Prevent name from breaking */
+}
+
+.user-circle span {
+    display: inline-block;
+    max-width: 100%;
+    text-overflow: ellipsis; /* Add ellipsis for overflow text */
+    overflow: hidden;
+}
+
+/* Optional: You can also ensure the circle doesn't become too large */
+.user-circle {
+    max-width: 120px; /* Max width for the circle */
+    min-width: 40px; /* Ensure it's not too small */
+}
+
+
+.user-circle:hover {
+    background-color: #0056b3;
+}
+
+/* Style for the dropdown menu */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 150px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Show the dropdown menu when toggled */
+.dropdown-menu.show {
+    display: block;
+}
