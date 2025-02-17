@@ -10,38 +10,38 @@
 </head>
 <body>
     <header>
-        <!-- Logo in top-left corner -->
+<!-- Logo in top-left corner -->
         <div class="logo">
             SPACE-IT
         </div>
     </header>
-
     <div class="container">
-        <form method="post">
+        <form method="post" id="login-form">
+
             {% csrf_token %}
 
             {% if messages %}
-                <ul>
+            <ul>
                     {% for message in messages %}
-                        <li>{{ message }}</li>
+                <li>{{ message }}</li>
                     {% endfor %}
-                </ul>
+            </ul>
             {% endif %}
 
             {% if form %}
+
                 {{ form.as_p }}
+
             {% else %}
-                <label for="username">Username:</label>
-                <input type="text" name="username" id="username" required><br><br>
-
-                <label for="password">Password:</label>
-                <input type="password" name="password" id="password" required><br><br>
+            <label for="username">Username:</label>
+            <input type="text" name="username" id="username" required>
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" required>
             {% endif %}
-
             <button type="submit">Login</button>
             <p>Don't have an account? <a href="{% url 'signup' %}">Sign up</a></p>
-        </form>
+     </form>
     </div>
-
+    <script src="{% static 'users/js/login.js' %}"></script>
 </body>
 </html>
