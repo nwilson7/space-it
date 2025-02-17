@@ -6,18 +6,48 @@ from django.contrib import messages
 from .decorators import logout_required, login_required
 from django.utils import timezone
 from launches.models import Launch
+from django.db.models import Q, Count, F, ExpressionWrapper, IntegerField
 
 @login_required
 def index(request):
-    user = request.user  # Get the logged-in user
-    role = user.role  # Assuming 'role' is a field in your User model
-
-    # Fetch the first 3 upcoming launches
-    upcoming_launches = Launch.objects.filter(launch_date__gte=timezone.now()).order_by('launch_date')[:3]
+    user = request.user
+    role = user.role
+    user_id = user.id
+    
+    if role == "cargo_owner":
+        # for cargo_owners fetch the soonest 3 launches that they have 1 or more bookings on
+        launches = Launch.objects.filter(
+            launch_date__gte=timezone.now(),
+            booking__cargo__owner_id=user_id,
+            booking__cancelled=False
+        ).annotate(
+            number_of_your_bookings=Count('booking', distinct=True)
+        ).order_by('launch_date')[:3]
+    else:
+        # for rocket_owners fetch the soonest 3 launches they have
+        # display today's launches and their transactions and future launches and their bookings
+        launches = Launch.objects.filter(rocket__owner_id=user_id,launch_date__gt=timezone.now()).order_by('launch_date')[:3]
+        launches = launches.annotate(
+            number_of_bookings=Count(
+                'booking',
+                filter=Q(booking__launch__rocket__owner_id=user_id, booking__cancelled=False),
+                distinct=True
+            ),
+            number_of_transactions=Count('booking__transaction'),
+            cargo_registered_kg=ExpressionWrapper(
+                F('booking__launch__rocket__cargo_capacity_kg') - F('booking__launch__remaining_capacity_kg'),
+                output_field=IntegerField()
+            )
+        )
+        
+        for launch in launches:
+            total_revenue = sum(booking.payment_amount for booking in launch.booking_set.filter(cancelled=False))
+            total_profit = total_revenue - launch.launch_cost
+            launch.total_profit = total_profit
 
     return render(request, "users/index.html", {
         "role": role,
-        "upcoming_launches": upcoming_launches,
+        "launches": launches,
         "user_name": user.username,
     })
 
