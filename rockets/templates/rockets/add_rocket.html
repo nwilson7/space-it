@@ -1,19 +1,49 @@
-<!-- myapp/templates/myapp/add_rocket.html -->
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add Rocket</title>
-</head>
-<body>
-    <h1>Add a New Rocket</h1>
+{% block title %}Register New Rocket{% endblock %}
+{% load static %}
 
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}  <!-- This will render the form fields as <p> tags -->
-        <button type="submit">Save Rocket</button>
-    </form>
-    <a href="{% url 'view_rockets' %}">Back to Rocket List</a>
-</body>
-</html>
+{% block content %}
+    <div class="container mt-5 relative">
+        <!-- Wrapper for centering heading and form -->
+        <div class="flex flex-col items-center">
+
+            <h1 class="text-2xl font-bold mb-6 text-white" style="text-align: center;">Register A New Rocket</h1>
+            <form method="POST" class="bg-black bg-opacity-40 p-6 rounded-lg backdrop-blur-lg shadow-lg" style="width: 600px;">
+                {% csrf_token %}
+                
+                <!-- Form Container -->
+                <div class="form-container mb-4">
+                    {% for field in form %}
+                        <div class="form-group mb-4 flex items-center justify-between">
+                            <label for="{{ field.id_for_label }}" class="text-white mr-4" style="width: 150px;">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Submit and Cancel Buttons in a flex container -->
+                <div class="flex justify-between">
+                    <!-- Submit Button -->
+                    <button type="submit" class="custom-button w-48">Register</button>
+
+                    <!-- Cancel Button -->
+                    <a href="{% url 'view_rockets' %}" class="custom-button w-48 text-center">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block styles %}
+    {% load static %}
+    <style>
+        body {
+            background-image: url("{% static 'images/urban_crawler.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white; /* Apply white color to all text */
+        }
+    </style>
+{% endblock %}

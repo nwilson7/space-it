@@ -1,114 +1,66 @@
-.container {
-    max-width: 900px;
-    margin: auto;
-    text-align: center;
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: url("{% static 'users/images/bg1.png' %}") no-repeat center center fixed;
+    background-size: cover;
+    color: #fff;
 }
-
-.dashboard-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.dashboard-button {
-    text-decoration: none;
-    background-color: #007bff;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-weight: bold;
-}
-
-.dashboard-button:hover {
-    background-color: #0056b3;
-}
-
+ 
 .dashboard-section {
-    margin-top: 30px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    margin: 50px auto;
+    max-width: 80%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
-
+ 
+.section-title {
+    font-size: 2rem;
+    text-align: center;
+    color: #ffcc00;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+}
+ 
+.launch-table-container {
+    overflow-x: auto;
+}
+ 
 .launch-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    background: rgba(255, 255, 255, 0.1);
 }
-
-.launch-table th, .launch-table td {
-    border: 1px solid #ddd;
+ 
+.launch-table th,
+.launch-table td {
+    border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 10px;
+    text-align: center;
+    color: #fff;
 }
-
-.view-all {
-    display: block;
-    margin-top: 10px;
-    text-decoration: none;
-    font-weight: bold;
+ 
+.launch-table th {
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffcc00;
+    text-transform: uppercase;
 }
-
-/* Style for the user profile circle */
-.user-profile {
-    position: relative;
-    display: inline-block;
+ 
+.launch-table td {
+    background: rgba(0, 0, 0, 0.5);
 }
-
-.user-circle {
-    padding: 10px 20px; /* Adjust the padding to make space for the name */
-    background-color: #007bff;
-    color: white;
-    border-radius: 50%; /* Keep it circular */
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    white-space: nowrap; /* Prevent name from breaking */
+ 
+.btn {
+    font-size: 0.9rem;
+    margin: 2px;
 }
-
-.user-circle span {
-    display: inline-block;
-    max-width: 100%;
-    text-overflow: ellipsis; /* Add ellipsis for overflow text */
-    overflow: hidden;
+ 
+.text-danger {
+    color: #ff5555 !important;
 }
-
-/* Optional: You can also ensure the circle doesn't become too large */
-.user-circle {
-    max-width: 120px; /* Max width for the circle */
-    min-width: 40px; /* Ensure it's not too small */
-}
-
-
-.user-circle:hover {
-    background-color: #0056b3;
-}
-
-/* Style for the dropdown menu */
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 50px;
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    width: 150px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.dropdown-menu a {
-    display: block;
-    padding: 10px;
-    text-decoration: none;
-    color: #333;
-}
-
-.dropdown-menu a:hover {
-    background-color: #f1f1f1;
-}
-
-/* Show the dropdown menu when toggled */
-.dropdown-menu.show {
-    display: block;
+ 
+.text-success {
+    color: #55ff55 !important;
 }
