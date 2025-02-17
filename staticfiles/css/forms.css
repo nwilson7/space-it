@@ -1,0 +1,37 @@
+
+
+
+/* Custom styling for input fields */
+input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select {
+    background-color: #f0f0f0; /* Light grey */
+    color: black; /* Text color inside input fields */
+    border-radius: 8px;
+    padding: 8px;
+    border: 1px solid #ccc; /* Optional border */
+    width: 100%; /* Make all inputs take up full width of the form */
+}
+
+/* Add greater spacing between form rows */
+.form-group {
+    margin-bottom: 1.5rem; /* Add space between form groups */
+}
+
+/* Optional: add spacing around the submit button */
+.custom-button {
+    padding: 10px 20px;
+    text-align: center;
+}
+
+/* Flex layout for submit and cancel buttons */
+.flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Style dropdown options */
+select, select option {
+    color: black; /* Set text color of dropdown options */
+    border-radius: 8px; /* Round corners of the dropdown */
+    padding: 8px;
+}

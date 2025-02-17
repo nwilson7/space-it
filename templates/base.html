@@ -1,0 +1,174 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Space It{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.min.js" defer></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex: 1;
+        }
+
+        /* Adjusted Navigation Bar */
+        header {
+            background: linear-gradient(to right, #000, #ddd);
+            padding: 5px 0; /* Reduced padding at the top and bottom */
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center; /* Ensures vertical alignment of items */
+            padding: 0 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem; /* Adjusted size for better alignment */
+            font-weight: bold;
+        }
+
+        nav {
+            display: flex;
+            align-items: center; /* Ensure buttons and profile are aligned vertically */
+            padding: 0; /* Removed extra padding */
+        }
+
+        .custom-button {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(55, 65, 81, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 6px 14px; /* Reduced padding to make buttons more compact */
+            font-weight: 600;
+            text-transform: uppercase;
+            color: white;
+            border-radius: 8px;
+            transition: box-shadow 0.3s ease, background-color 0.3s ease;
+            font-size: 0.875rem; /* Adjusted size */
+            margin-left: 8px; /* Margin between buttons */
+            align-items: center;
+        }
+
+        .custom-button:hover {
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .profile-button {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(55, 65, 81, 0.6);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px; /* Adjusted font size */
+            font-weight: 600;
+            color: white;
+            border-radius: 50%;
+            transition: box-shadow 0.3s ease, background-color 0.3s ease;
+            margin-left: 16px;
+        }
+
+        .profile-button:hover {
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Mobile navbar */
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column; /* Stack items vertically */
+                align-items: flex-start;
+            }
+
+            nav {
+                flex-direction: column;
+                align-items: flex-start; /* Align items to the left */
+                margin-top: 10px;
+            }
+
+            nav a {
+                margin-bottom: 10px; /* Margin between links */
+            }
+
+            .profile-button {
+                margin-top: 10px; /* Prevent overlap */
+            }
+        }
+    </style>
+    {% block styles %}{% endblock %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+</head>
+<body class="bg-gray-100">
+    
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-black to-gray-200 text-white py-3">
+        <div class="container mx-auto flex justify-between items-center px-6">
+            <!-- Logo -->
+            <h1 class="text-2xl font-bold pl-4">
+                <a href="{% url 'home' %}">Space It</a>
+            </h1>
+    
+            <!-- Responsive Navbar -->
+            <nav class="space-x-4 hidden md:flex items-center">
+                {% if user.is_authenticated %}
+                    {% if user.role == "cargo_owner" %}
+                        <a href="{% url 'home' %}" class="custom-button">Home</a>
+                        <a href="{% url 'view_cargo' %}" class="custom-button">Cargo</a>
+                        <a href="{% url 'view_your_bookings' %}" class="custom-button">Bookings</a>
+                        <a href="{% url 'view_your_transactions' %}" class="custom-button">Transactions</a>
+                        <a href="{% url 'view_all_launches' %}" class="custom-button">Launches</a>
+                    {% elif user.role == "rocket_owner" %}
+                        <a href="{% url 'home' %}" class="custom-button">Home</a>
+                        <a href="{% url 'view_rockets' %}" class="custom-button">Rockets</a>
+                        <a href="{% url 'view_your_transactions' %}" class="custom-button">Transactions</a>
+                        <a href="{% url 'view_your_launches' %}" class="custom-button">Your Launches</a>
+                        <a href="{% url 'view_all_launches' %}" class="custom-button">All Launches</a>
+                    {% endif %}
+    
+                    <!-- Profile Dropdown -->
+                    <div x-data="{ open: false }" class="relative pr-4">
+                        <button @click="open = !open" class="profile-button">
+                            <span class="font-bold text-lg">{{ user.username.0 }}</span>
+                        </button>
+    
+                        <!-- Dropdown menu -->
+                        <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg">
+                            <a href="{% url 'edit_user' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Edit Profile</a>
+                            <a href="{% url 'logout' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Sign Out</a>
+                        </div>
+                    </div>
+    
+                {% else %}
+                    <a href="{% url 'login' %}" class="bg-gray-700 border border-gray-500 backdrop-blur-md shadow-lg hover:shadow-md px-4 py-3 text-white rounded">Login</a>
+                    <a href="{% url 'signup' %}" class="bg-gray-700 border border-gray-500 backdrop-blur-md shadow-lg hover:shadow-md px-4 py-3 text-white rounded">Sign Up</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>    
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Sticky Footer -->
+    <footer class="bg-gray-800 text-white py-4 text-center mt-auto">
+        <p>&copy; 2025 Space It. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
