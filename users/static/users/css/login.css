@@ -41,6 +41,7 @@ form {
     box-sizing: border-box;
     text-align: left;
     backdrop-filter: blur(5px);
+    color: white;
 }
 
 form h2 {
