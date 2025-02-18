@@ -1,141 +1,176 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Bookings</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1>Your Bookings</h1>
-        <a href="/launches" class="btn btn-primary">Make a Booking</a>
-        <!-- Pending Bookings -->
-        <h3>Pending Bookings (Not Launched)</h3>
-        <table class="table table-bordered">
-            <thead>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Bookings{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-white">Your Bookings</h1>
+        <a href="/launches" class="custom-button bg-blue-600 hover:bg-blue-700">Make a Booking</a>
+    </div>
+
+    <!-- Pending Bookings -->
+    <div class="bg-black bg-opacity-40 rounded-lg backdrop-blur-lg shadow-xl overflow-hidden mb-8">
+        <h3 class="text-2xl font-bold text-white p-4 bg-black bg-opacity-60">Pending Bookings</h3>
+        <table class="w-full">
+            <thead class="bg-black bg-opacity-60">
                 <tr>
-                    <th>Booking ID</th>
-                    <th>Launch Date</th>
-                    <th>Cargo Name</th>
-                    <th>Item Weight</th>
-                    <th>Number of Items</th>
-                    <th>Total Weight (kg)</th>
-                    <th>Payment Amount (£)</th>
-                    <th>Actions</th>
+                    <th class="text-white p-4 text-left">Booking ID</th>
+                    <th class="text-white p-4 text-left">Launch Date</th>
+                    <th class="text-white p-4 text-left">Cargo Name</th>
+                    <th class="text-white p-4 text-left">Item Weight</th>
+                    <th class="text-white p-4 text-left">Items</th>
+                    <th class="text-white p-4 text-left">Total Weight</th>
+                    <th class="text-white p-4 text-left">Payment</th>
+                    <th class="text-white p-4 text-left">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for booking in pending_bookings %}
-                    <tr id="booking-{{ booking.id }}">
-                        <td>{{ booking.id }}</td>
-                        <td>{{ booking.launch.launch_date }}</td>
-                        <td>{{ booking.cargo.cargoname }}</td>
-                        <td>{{ booking.cargo.weight_per_item }}</td>
-                        <td>{{ booking.cargo.number_of_items }}</td>
-                        <td>{{ booking.cargo.total_weight }}</td>
-                        <td>{{ booking.payment_amount }}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm cancel-booking-btn" data-booking-id="{{ booking.id }}">
-                                Cancel Booking
-                            </button>
-                        </td>
-                    </tr>
+                <tr id="booking-{{ booking.id }}" class="border-b border-gray-700 hover:bg-black hover:bg-opacity-20 transition-colors">
+                    <td class="text-white p-4">{{ booking.id }}</td>
+                    <td class="text-white p-4">{{ booking.launch.launch_date }}</td>
+                    <td class="text-white p-4">{{ booking.cargo.cargoname }}</td>
+                    <td class="text-white p-4">{{ booking.cargo.weight_per_item }} kg</td>
+                    <td class="text-white p-4">{{ booking.cargo.number_of_items }}</td>
+                    <td class="text-white p-4">{{ booking.cargo.total_weight }} kg</td>
+                    <td class="text-white p-4">£{{ booking.payment_amount }}</td>
+                    <td class="p-4">
+                        <button class="custom-button bg-yellow-600 hover:bg-yellow-700 cancel-booking-btn" 
+                                data-booking-id="{{ booking.id }}">
+                            Cancel
+                        </button>
+                    </td>
+                </tr>
                 {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center">No pending bookings available.</td>
-                    </tr>
+                <tr>
+                    <td colspan="8" class="text-white p-4 text-center">No pending bookings available</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
 
-        <!-- Launched Bookings -->
-        <h3>Launched Bookings</h3>
-        <table class="table table-bordered">
-            <thead>
+    <!-- Launched Bookings -->
+    <div class="bg-black bg-opacity-40 rounded-lg backdrop-blur-lg shadow-xl overflow-hidden">
+        <h3 class="text-2xl font-bold text-white p-4 bg-black bg-opacity-60">Launched Bookings</h3>
+        <table class="w-full">
+            <thead class="bg-black bg-opacity-60">
                 <tr>
-                    <th>Booking ID</th>
-                    <th>Launch Date</th>
-                    <th>Cargo Name</th>
-                    <th>Item Weight</th>
-                    <th>Number of Items</th>
-                    <th>Total Weight (kg)</th>
-                    <th>Payment Amount (£)</th>
-                    <th>Actions</th>
+                    <th class="text-white p-4 text-left">Booking ID</th>
+                    <th class="text-white p-4 text-left">Launch Date</th>
+                    <th class="text-white p-4 text-left">Cargo Name</th>
+                    <th class="text-white p-4 text-left">Item Weight</th>
+                    <th class="text-white p-4 text-left">Items</th>
+                    <th class="text-white p-4 text-left">Total Weight</th>
+                    <th class="text-white p-4 text-left">Payment</th>
+                    <th class="text-white p-4 text-left">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for booking in launched_bookings %}
-                    <tr>
-                        <td>{{ booking.id }}</td>
-                        <td>{{ booking.launch.launch_date }}</td>
-                        <td>{{ booking.cargo.cargoname }}</td>
-                        <td>{{ booking.cargo.weight_per_item }}</td>
-                        <td>{{ booking.cargo.number_of_items }}</td>
-                        <td>{{ booking.cargo.total_weight }}</td>
-                        <td>{{ booking.payment_amount }}</td>
-                        <td>
-                            <!-- View Transaction Button -->
-                            <a href="{% url 'view_transaction' booking.id %}" class="btn btn-info btn-sm">View Transaction</a>
-                        </td>
-                    </tr>
+                <tr class="border-b border-gray-700 hover:bg-black hover:bg-opacity-20 transition-colors">
+                    <td class="text-white p-4">{{ booking.id }}</td>
+                    <td class="text-white p-4">{{ booking.launch.launch_date }}</td>
+                    <td class="text-white p-4">{{ booking.cargo.cargoname }}</td>
+                    <td class="text-white p-4">{{ booking.cargo.weight_per_item }} kg</td>
+                    <td class="text-white p-4">{{ booking.cargo.number_of_items }}</td>
+                    <td class="text-white p-4">{{ booking.cargo.total_weight }} kg</td>
+                    <td class="text-white p-4">£{{ booking.payment_amount }}</td>
+                    <td class="p-4">
+                        <a href="{% url 'view_transaction' booking.id %}" 
+                           class="custom-button bg-blue-600 hover:bg-blue-700">
+                            View
+                        </a>
+                    </td>
+                </tr>
                 {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center">No launched bookings available.</td>
-                    </tr>
+                <tr>
+                    <td colspan="8" class="text-white p-4 text-center">No launched bookings available</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
-
     </div>
+</div>
+{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block styles %}
+<style>
+    body {
+        background-image: url("{% static 'images/spaceport.png' %}");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
 
-    <!-- AJAX Script for Cancel Booking -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.addEventListener("click", function (event) {
-                if (event.target.classList.contains("cancel-booking-btn")) {
-                    const bookingId = event.target.dataset.bookingId;
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    
+    th, td {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+        
+        table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+    }
+</style>
+{% endblock %}
 
-                    fetch(`/bookings/cancel/${bookingId}/`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRFToken": getCookie("csrftoken"),
-                        },
-                        credentials: "same-origin",
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        alert(data.message || data.error || "Unknown response");
-                        if (data.message) {
-                            document.getElementById(`booking-${bookingId}`).remove();
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                        alert("An error occurred. Please try again.");
-                    });
-                }
-            });
-        });
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("click", function (event) {
+            if (event.target.classList.contains("cancel-booking-btn")) {
+                const bookingId = event.target.dataset.bookingId;
 
-        // Function to get CSRF token from cookie
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let cookie of cookies) {
-                    cookie = cookie.trim();
-                    if (cookie.startsWith(name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
+                fetch(`/bookings/cancel/${bookingId}/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    },
+                    credentials: "same-origin",
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || data.error || "Unknown response");
+                    if (data.message) {
+                        document.getElementById(`booking-${bookingId}`).remove();
                     }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("An error occurred. Please try again.");
+                });
+            }
+        });
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
             }
-            return cookieValue;
         }
-    </script>
-</body>
-</html>
+        return cookieValue;
+    }
+</script>
+{% endblock %}
