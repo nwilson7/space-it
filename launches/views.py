@@ -202,6 +202,7 @@ def delete_launch(request, id):
 def view_booked(request, id):
     launch = get_object_or_404(Launch, id=id, rocket__owner=request.user)
     bookings = Booking.objects.filter(launch=launch, cancelled=False)
+    
     total_revenue = sum(booking.payment_amount for booking in bookings)
     total_profit = total_revenue - launch.launch_cost
 
